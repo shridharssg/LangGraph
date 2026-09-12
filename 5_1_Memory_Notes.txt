@@ -1,0 +1,317 @@
+MEMORY IN GEN AI - STRUCTURED NOTES
+====================================================================
+
+A. Memory Fundamentals
+
+	1. Importance of Memory
+		- Memory is a foundational component of GenAI applications.
+		- Chatbots and AI Agents cannot function effectively without memory.
+		- Memory enables continuity across interactions.
+
+--------------------------------------------------------------------
+
+B. Stateless Nature of LLMs
+
+	Definition:
+		A system is stateless if its output depends only on the current input and not on anything that happened before.
+
+	Characteristics:
+		- Each inference call is independent.
+		- Previous prompts and responses are not remembered.
+		- LLMs do not possess intrinsic memory.
+
+	Example:
+		Input 1:
+			"My name is shridhar"
+
+		Input 2:
+			"What is my name?"
+
+		Result:
+			The LLM cannot answer correctly because previous interaction is not remembered.
+
+--------------------------------------------------------------------
+
+C. Why Memory Is Needed
+
+	Facts:
+		- LLMs do not have built-in memory.
+		- GenAI applications require memory.
+		- Therefore, memory must be built externally.
+
+	Goal:
+		Create a system around the LLM that behaves like memory.
+
+--------------------------------------------------------------------
+
+D. Context Window
+
+	Definition:
+		The amount of text an LLM can read and remember at one time before answering.
+
+	Key Points:
+		- Every LLM has a context window.
+		- Larger context windows allow more text processing.
+		- Modern models may support very large context windows.
+
+	Analogy:
+		- Camera = LLM
+		- Lens = Context Window
+		- Bigger lens captures more of the scene.
+
+--------------------------------------------------------------------
+
+E. In-Context Learning
+
+	Definition:
+		An emergent ability allowing an LLM to use information present in the prompt itself, in addition to its trained knowledge.
+
+	Example:
+		- A private PDF is provided inside the prompt.
+		- The model answers questions using information from that PDF.
+		- The information need not exist in model parameters.
+
+--------------------------------------------------------------------
+
+G. Conversation Buffer / Messages Variable
+
+	Definition:
+		A variable that stores conversation history.
+
+	Purpose:
+		- Maintains state across interactions.
+		- Makes a stateless system appear stateful.
+
+--------------------------------------------------------------------
+
+H. Short-Term Memory (STM)
+
+	Definition:
+		Conversation history stored for the current conversation.
+
+	Characteristics:
+		- Temporary
+		- Exists only within one conversation
+		- Lost if not persisted
+
+	Scope:
+		- Conversation Scoped
+		- Thread Scoped
+
+	Thread = Conversation
+
+--------------------------------------------------------------------
+
+I. Chatbot Implementation of STM
+
+	For Every Conversation:
+		- Maintain a separate conversation buffer.
+		- Store only messages belonging to that conversation.
+
+	Reason:
+		- Prevent extremely large and incoherent histories.
+		- Keep context relevant.
+
+--------------------------------------------------------------------
+
+J. Problems of Short-Term Memory
+
+	1. Fragile Memory
+
+		Problem:
+			- Memory is stored in runtime variables.
+			- Server restart or crash causes data loss.
+
+		Solution:
+			- Persist conversation history in a database.
+			- Use Thread IDs.
+
+	2. Context Window Problem
+
+		Problem:
+			- Long conversations exceed context window limits.
+			- Responses may become incoherent.
+
+		Solutions:
+			A. Trimming
+				- Keep only most recent messages.
+
+			B. Summarization
+				- Summarize older messages.
+				- Send summary + recent messages.
+
+	3. Thread-Scoped Limitation
+
+		Problems:
+			- No continuity across conversations.
+			- User preferences are forgotten.
+			- Learning does not compound over time.
+			- Cross-thread reasoning is impossible.
+			- Personalization is limited.
+
+--------------------------------------------------------------------
+
+K. Need for Long-Term Memory (LTM)
+
+	Requirements:
+		1. Store useful information beyond a single conversation.
+		2. Be highly selective.
+		3. Retain stable, reusable information.
+
+	Examples of Useful Information:
+		- User identity details
+		- User preferences
+		- Successful strategies
+		- Previous decisions
+		- Working processes
+
+--------------------------------------------------------------------
+
+L. Long-Term Memory Types
+
+	1. Episodic Memory
+
+		Purpose:
+			Stores past events and experiences.
+
+		Examples:
+			- Previous solution succeeded.
+			- Previous deployment failed.
+			- Earlier decisions.
+
+		Answers Questions Like:
+			- What happened last time?
+			- Have we seen this before?
+
+	2. Semantic Memory
+
+		Purpose:
+			Stores facts.
+
+		Examples:
+			- User prefers Python.
+			- User is a beginner.
+			- System uses PostgreSQL.
+			- Budget is ₹10,000.
+
+	3. Procedural Memory
+
+		Purpose:
+			Stores ways of doing things.
+
+		Examples:
+			- Preferred workflows.
+			- Rules.
+			- Learned behaviors.
+			- Tool usage preferences.
+
+--------------------------------------------------------------------
+
+M. Long-Term Memory Workflow
+
+	1. Creation / Update
+
+		Goal:
+			Identify information worth remembering.
+
+		Tasks:
+			- Extract memory candidates.
+			- Remove noise.
+			- Determine scope.
+			- Create, update, or ignore memory.
+
+	------------------------------------------------------------
+
+	2. Storage
+
+		Goal:
+			Store memory durably.
+
+		Tasks:
+			- Save memory.
+			- Attach metadata.
+			- Enable future retrieval.
+
+		Possible Storage Options:
+			- Relational Databases
+			- Key-Value Stores
+			- Logs
+			- Vector Databases
+
+	------------------------------------------------------------
+
+	3. Retrieval
+
+		Goal:
+			Fetch only relevant memory.
+
+		Process:
+			- Analyze current input.
+			- Search memory store.
+			- Retrieve relevant subset.
+
+		Important:
+			Retrieval is selective, not exhaustive.
+
+	------------------------------------------------------------
+
+	4. Injection
+
+		Goal:
+			Inject retrieved memory into the prompt.
+
+		Flow:
+			Long-Term Memory
+				↓
+			Short-Term Memory / Prompt Context
+				↓
+			LLM
+
+		Important:
+			Long-term memory is not used directly.
+			It becomes part of prompt context first.
+
+--------------------------------------------------------------------
+
+N. Challenges in Building Memory Systems
+
+	1. Memory Creation Challenge
+		- Identifying what should be remembered.
+
+	2. Memory Retrieval Challenge
+		- Determining which memories are relevant.
+
+	3. Orchestration Challenge
+		- Managing memory stores.
+		- Integrating memory with agents and applications.
+		- Handling multiple moving parts.
+
+--------------------------------------------------------------------
+
+O. Memory Solutions 
+	Examples:
+		- LangMem
+		- Mem0
+		- SuperMemory
+
+	Purpose:
+		Provide memory layers for GenAI and Agentic AI applications.
+
+--------------------------------------------------------------------
+
+P. Key Takeaways
+
+	- LLMs are inherently stateless.
+	- LLMs do not possess intrinsic memory.
+	- Short-Term Memory is conversation scoped.
+	- Long-Term Memory enables personalization and continuity.
+	- Long-Term Memory consists of:
+		- Episodic Memory
+		- Semantic Memory
+		- Procedural Memory
+	- LTM workflow consists of:
+		- Creation
+		- Storage
+		- Retrieval
+		- Injection
+	- Memory is essential for effective GenAI and Agentic AI systems.

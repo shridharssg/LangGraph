@@ -1,0 +1,242 @@
+CORRECTIVE RAG (CRAG) INTERVIEW GUIDE
+====================================
+
+
+
+
+1. WHAT IS CRAG?
+
+CRAG (Corrective Retrieval-Augmented Generation) enhances traditional RAG by evaluating retrieved documents before sending them to the LLM.
+
+Goal:
+Detect poor retrieval results and correct them before generation.
+
+ARCHITECTURE
+
+User Query
+     |
+     v
+ Retriever
+     |
+     v
+ Retrieved Documents
+     |
+     v
+ Retrieval Evaluator
+     |
+     +--> High Confidence
+     |         |
+     |         v
+     |      Generate Answer
+     |
+     +--> Medium Confidence
+     |         |
+     |         v
+     |   Retrieval + External Search
+     |
+     +--> Low Confidence
+               |
+               v
+         External Search
+               |
+               v
+          Generate Answer
+		  
+		  
+Why CRAG Is Needed
+------------------------------------------------------------------------
+
+	Goal:
+		Verify whether retrieved documents are actually useful
+		for answering the query.
+
+	Solution:
+		Introduce a Retrieval Evaluator.
+
+
+Retrieval Evaluator
+------------------------------------------------------------------------
+
+	Purpose:
+		Evaluate relevance of retrieved documents.
+
+	Inputs:
+		- User Query
+		- Retrieved Documents
+
+	Output:
+		- Relevance Score
+		- Decision
+
+	Possible Decisions:
+		1. Correct
+		2. Incorrect
+		3. Ambiguous
+		
+		
+
+G. Correct 
+------------------------------------------------------------------------
+
+	Condition:
+		Retrieved documents are highly relevant.
+
+	Process:
+		Retrieved Documents
+			↓
+		Knowledge Refinement
+			↓
+		Generation
+
+========================================================================
+
+H. Incorrect 
+------------------------------------------------------------------------
+
+	Condition:
+		Retrieved documents are not relevant.
+
+	Process:
+		Query
+			↓
+		Web Search
+			↓
+		External Knowledge
+			↓
+		Generation
+
+========================================================================
+
+I. Ambiguous 
+------------------------------------------------------------------------
+
+	Condition:
+		Documents are partially useful.
+
+	Process:
+		Internal Knowledge
+			+
+		External Knowledge
+			↓
+		Combined Context
+			↓
+		Generation
+
+
+
+M. Retrieval Evaluation Logic
+------------------------------------------------------------------------
+
+	Inputs:
+		- Query
+		- Retrieved Document
+
+	Output:
+		Relevance Score (0 to 1)
+
+	Meaning:
+		1.0 = Perfectly Relevant
+		0.0 = Completely Irrelevant
+
+========================================================================
+
+N. Threshold-Based Decision Making
+------------------------------------------------------------------------
+
+	Lower Threshold:
+		0.3
+
+	Upper Threshold:
+		0.7
+
+------------------------------------------------------------------------
+
+	Correct:
+
+		Condition:
+			At least one document score > 0.7
+
+------------------------------------------------------------------------
+
+	Incorrect:
+
+		Condition:
+			No document score > 0.3
+
+------------------------------------------------------------------------
+
+	Ambiguous:
+
+		Condition:
+			Between both thresholds.
+
+========================================================================
+
+O. Good Documents
+------------------------------------------------------------------------
+
+	Definition:
+		Documents with score greater than lower threshold.
+
+	Purpose:
+		Only these documents are used for generation.
+
+========================================================================
+		
+
+IMPORTANT INTERVIEW QUESTIONS
+
+Q1. What is CRAG?
+Ans: Corrective Retrieval-Augmented Generation is a framework that evaluates retrieval quality and applies corrective actions when retrieval is poor.
+
+Q2. Why was CRAG introduced?
+Ans: Traditional RAG heavily depends on retrieval quality. Incorrect retrieval results can cause hallucinations.
+
+Q3. Main component of CRAG?
+Ans: Retrieval Evaluator.
+
+Q4. What does Retrieval Evaluator do?
+Ans: Measures confidence and relevance of retrieved documents.
+
+Q5. Confidence categories in CRAG?
+Ans:
+- High Confidence
+- Medium Confidence
+- Low Confidence
+
+Q6. What happens during high confidence?
+Ans: Retrieved documents are refined and directly used.
+
+Q7. What happens during low confidence?
+Ans: Retrieval results are discarded and external search is performed.
+
+Q8. What happens during medium confidence?
+Ans: Retrieved documents are combined with additional search results.
+
+Q9. What is Decompose-and-Recompose?
+Ans: A refinement approach where useful information is extracted and noise is removed before generation.
+
+Q10. Advantages of CRAG?
+Ans:
+- Better retrieval quality
+- Lower hallucinations
+- Improved robustness
+- Better response accuracy
+
+Q11. Disadvantages of CRAG?
+Ans:
+- Additional latency
+- More infrastructure
+- Extra retrieval cost
+
+Q12. Difference between CRAG and Traditional RAG?
+Ans: RAG trusts retrieved documents. CRAG validates retrieval quality before generation.
+
+Q13. Difference between CRAG and Self-RAG?
+Ans: CRAG focuses on correcting retrieval quality. Self-RAG focuses on self-reflection and generation validation.
+
+Q14. When should CRAG be used?
+Ans: Large enterprise knowledge bases, compliance systems, financial systems, and frequently changing knowledge sources.
+
+Q15. In one line explain CRAG.
+Ans: CRAG evaluates and corrects retrieval results before the LLM generates the answer.

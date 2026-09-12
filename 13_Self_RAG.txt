@@ -1,0 +1,575 @@
+SELF-RAG INTERVIEW GUIDE
+========================
+
+start
+  ↓
+decide_retrieval
+  ├─► generate_direct
+  │        ↓
+  │       end
+  │
+  └─► retrieve
+           ↓
+      is_relevant
+           ↓
+ generate_from_context
+           ↓
+         is_sup
+      (supported?)
+      ├─ No → revise_answer
+      │          ↓
+      │        is_sup
+      │
+      └─ Yes
+           ↓
+         is_use
+      (useful?)
+      ├─ No → rewrite_question → retrieve again
+      └─ Yes → end
+
+
+this architecture is very important because it demonstrates the four Self-RAG decisions:
+
+Should I retrieve? (decide_retrieval)
+Are the retrieved documents relevant? (is_relevant)
+Is my answer supported by evidence? (is_sup)
+Is the answer useful to the user? (is_use)
+
+These are the core Self-RAG concepts
+
+
+
+1. WHAT IS SELF-RAG?
+
+Self-RAG (Self-Reflective Retrieval-Augmented Generation) is an advanced RAG framework where the LLM can decide:
+- Whether retrieval is needed
+- When to retrieve
+- How to evaluate retrieved information
+- Whether generated answers are supported by evidence
+
+Goal:
+Improve factuality, reduce hallucinations, and make retrieval dynamic.
+
+ARCHITECTURE
+
+User Query
+    |
+    v
+LLM Decision Node
+    |
+    +--> Retrieve Required?
+            |
+            v
+        Retriever
+            |
+            v
+        Documents
+            |
+            v
+    Self Reflection Tokens
+            |
+            v
+      Answer Generation
+            |
+            v
+      Critique/Verify
+            |
+            v
+       Final Answer
+
+
+
+========================================================================
+
+B. Problems with Traditional RAG
+------------------------------------------------------------------------
+
+	1. Unnecessary Retrieval
+
+		Problem:
+			RAG performs retrieval even when retrieval is not needed.
+
+		Example:
+			Question:
+				How many seconds are there in a minute?
+
+		Issue:
+			LLM already knows the answer.
+			Retrieval creates unnecessary overhead.
+
+	------------------------------------------------------------
+
+	2. Blind Trust in Retrieved Documents
+
+		Problem:
+			Traditional RAG assumes retrieved documents
+			are always relevant.
+
+		Risk:
+			Incorrect documents can produce incorrect answers.
+
+	------------------------------------------------------------
+
+	3. No Answer Verification
+
+		Problem:
+			Generated answers are not checked.
+
+		Risk:
+			Hallucinations may reach users directly.
+
+
+========================================================================
+
+C. What is Self-RAG?
+------------------------------------------------------------------------
+
+	Definition:
+		Self-RAG introduces self-reflection into the
+		retrieval and generation pipeline.
+
+	Core Principle:
+		Continuously evaluate every step.
+
+========================================================================
+
+D. Four Key Questions Answered by Self-RAG
+------------------------------------------------------------------------
+
+	1. Is Retrieval Needed?
+
+		Question:
+			Can the LLM answer directly using
+			parametric knowledge?
+
+	------------------------------------------------------------
+
+	2. Are Retrieved Documents Relevant?
+
+		Question:
+			Do retrieved documents actually help
+			answer the query?
+
+	------------------------------------------------------------
+
+	3. Is the Generated Answer Grounded?
+
+		Question:
+			Does every claim in the answer come from
+			the retrieved evidence?
+
+	------------------------------------------------------------
+
+	4. Is the Answer Useful?
+
+		Question:
+			Does the answer really solve the user's question?
+
+========================================================================
+
+
+E. High-Level Self-RAG Architecture
+------------------------------------------------------------------------
+
+	User Query
+		↓
+	Need Retrieval?
+		↓
+	Retrieve Documents
+		↓
+	Document Relevance Check
+		↓
+	Generate Answer
+		↓
+	Support Check
+		↓
+	Usefulness Check
+		↓
+	Final Answer
+
+========================================================================
+
+
+========================================================================
+
+F. Retrieval Decision Stage
+------------------------------------------------------------------------
+
+	Purpose:
+		Determine whether retrieval is necessary.
+
+	Case 1:
+		General Knowledge Question
+			→ Direct Generation
+
+	Case 2:
+		Company-Specific Question
+			→ Retrieval Required
+
+========================================================================
+
+G. Document Relevance Filtering
+------------------------------------------------------------------------
+
+	Purpose:
+		Remove irrelevant documents.
+
+	Process:
+		1. Retrieve documents.
+		2. Evaluate each document.
+		3. Keep only relevant documents.
+		4. Remove noise.
+
+	Result:
+		Relevant Documents List
+
+========================================================================
+
+H. Example of Relevance Filtering
+------------------------------------------------------------------------
+
+	Question:
+		Who is the CEO of Nexa AI?
+
+	Retrieved Documents:
+		4 Documents
+
+	Relevant Documents:
+		1 Document
+
+	Outcome:
+		Only the CEO-related document is retained.
+
+========================================================================
+
+I. Answer Generation from Context
+------------------------------------------------------------------------
+
+	Purpose:
+		Generate answers only from relevant context.
+
+	Inputs:
+		- User Question
+		- Relevant Context
+
+	Output:
+		Answer
+
+========================================================================
+
+J. Support Verification Stage
+------------------------------------------------------------------------
+
+	Purpose:
+		Detect hallucinations.
+
+	Question Asked:
+		Is the generated answer supported by evidence?
+
+========================================================================
+
+K. Support Categories
+------------------------------------------------------------------------
+
+	1. Fully Supported
+
+		Meaning:
+			Every statement comes from retrieved evidence.
+
+	------------------------------------------------------------
+
+	2. Partially Supported
+
+		Meaning:
+			Some facts come from evidence.
+			Others are fabricated by the model.
+
+	------------------------------------------------------------
+
+	3. Not Supported
+
+		Meaning:
+			Answer is mostly or completely hallucinated.
+
+========================================================================
+
+L. Hallucination Example
+------------------------------------------------------------------------
+
+	Question:
+		What are the side effects of Drug X?
+
+	Evidence:
+		- Dizziness
+		- Nausea
+
+	Generated Answer:
+		- Dizziness
+		- Nausea
+		- Fatigue
+		- Headache
+
+	Observation:
+		Fatigue and headache are not supported.
+
+	Result:
+		Partially Supported
+
+========================================================================
+
+M. Answer Revision Stage
+------------------------------------------------------------------------
+
+	Purpose:
+		Remove unsupported facts.
+
+	Input:
+		- Original Question
+		- Context
+		- Generated Answer
+
+	Task:
+		Rewrite answer using only supported facts.
+
+========================================================================
+
+
+
+
+N. Revision Loop
+------------------------------------------------------------------------
+
+	Generated Answer
+		↓
+	Support Check
+		↓
+	Partially Supported / Not Supported
+		↓
+	Revise Answer
+		↓
+	Support Check Again
+
+	Repeat Until:
+		Fully Supported
+
+========================================================================
+
+O. Retry Protection
+------------------------------------------------------------------------
+
+	Problem:
+		Infinite revision loops.
+
+	Solution:
+		Maximum Retry Count
+
+	Example:
+		Max Retries = 5
+
+	After Limit:
+		Return No Answer Found
+
+========================================================================
+
+========================================================================
+
+T. Complete Self-RAG Workflow
+------------------------------------------------------------------------
+
+	User Query
+		↓
+	Need Retrieval?
+		↓
+	Retrieve Documents
+		↓
+	Relevance Filtering
+		↓
+	Generate Answer
+		↓
+	Support Check
+		↓
+	If Not Supported
+		→ Revise Answer
+		→ Retry
+
+		↓
+	Usefulness Check
+		↓
+	If Not Useful
+		→ Rewrite Query
+		→ Retrieve Again
+		→ Repeat Process
+
+		↓
+	Final Answer
+	
+	
+
+
+IMPORTANT INTERVIEW QUESTIONS
+
+Q1. What is Self-RAG?
+Ans: A RAG framework where the model retrieves information only when required and uses self-reflection to verify its answers.
+
+Q2. Why was Self-RAG introduced?
+Ans: To reduce hallucinations and improve answer quality by allowing the model to evaluate retrieval and generation quality.
+
+Q3. Difference between RAG and Self-RAG?
+Ans: Traditional RAG always retrieves. Self-RAG decides when retrieval is required and evaluates generated content.
+
+Q4. What are reflection tokens?
+Ans: Special control tokens used during training to guide retrieval, critique, and verification decisions.
+
+Q5. Advantages of Self-RAG?
+Ans:
+- Better factuality
+- Dynamic retrieval
+- Lower hallucination rate
+- Better document utilization
+
+Q6. Disadvantages of Self-RAG?
+Ans:
+- More complex architecture
+- Higher inference cost
+- Additional training requirements
+
+Q7. When should Self-RAG be used?
+Ans: Research assistants, enterprise search, compliance systems, medical and legal knowledge assistants.
+
+Q8. How does Self-RAG reduce hallucinations?
+Ans: Generated responses are checked against retrieved evidence before finalizing the answer.
+
+Q9. What is adaptive retrieval?
+Ans: Retrieval occurs only when the model determines external knowledge is needed.
+
+Q10. Is Self-RAG better than basic RAG?
+Ans: Generally yes for complex knowledge-intensive tasks, but with additional cost and complexity.
+
+
+Q. What is decide_retrieval in Self-RAG?
+Ans:
+It determines whether external knowledge is required.
+If not required, the model generates directly.
+
+Q. What is is_relevant?
+Ans:
+It checks whether retrieved documents are relevant to the query.
+
+Q. What is is_sup?
+Ans:
+It checks whether the generated answer is supported by retrieved evidence.
+
+Q. What is revise_answer?
+Ans:
+If the answer is not supported by evidence, the model revises the answer using retrieved documents.
+
+Q. What is is_use?
+Ans:
+It evaluates whether the answer is useful, complete, and informative for the user.
+
+Q. What is rewrite_question?
+Ans:
+If the answer is not useful, the query is reformulated and retrieval is performed again.
+
+Q. Why is Self-RAG called Self-Reflective RAG?
+Ans:
+Because the model continuously evaluates its own retrieval decisions and generated answers before returning the final response.
+
+
+
+CRAG:
+Focus = Retrieval Correction
+
+Self-RAG:
+Focus = Retrieval + Generation Self-Evaluation
+
+CRAG asks:
+"Are the retrieved documents good?"
+
+Self-RAG asks:
+"Do I need retrieval?"
+"Are documents relevant?"
+"Is my answer supported?"
+"Is my answer useful?"
+
+
+
+---------------
+
+
+Self-RAG and CRAG solve different problems.
+
+Self-RAG focuses on LLM self-reflection, while CRAG focuses on retrieval quality correction.
+
+Many people think Self-RAG completely replaces CRAG, but in practice they are complementary.
+
+
+CRAG asks:
+	Is my evidence trustworthy?
+
+SELF-RAG asks : 
+	Is my answer supported by the evidence?
+
+
+
+means CRAG check document quality, and SELF-RAG check ans quality and it should be align with document that fetch
+
+mean self rag doesnt check that retriver doc quality. its check whether its from retirve document or not. so CRAG needed. 
+
+
+=========
+
+Q: If Self-RAG performs retrieval checking and answer validation, why do we still need CRAG?
+
+Answer:
+
+Self-RAG primarily focuses on self-reflection during generation. It decides whether retrieval is required, checks document relevance, verifies answer support, and evaluates answer usefulness.
+
+However, Self-RAG does not deeply assess the overall quality of retrieved knowledge. If the retriever returns outdated, incomplete, or incorrect documents, Self-RAG may still generate an answer based on poor evidence.
+
+CRAG solves this by introducing a retrieval evaluator before generation. It measures retrieval quality and can trigger corrective actions such as filtering documents, re-retrieving, or using external search.
+
+
+
+advanced production
+
+	Query
+	   ↓
+	CRAG
+	(Retrieval Evaluation)
+	   ↓
+	Self-RAG
+	(Self Reflection)
+	   ↓
+	Final Answer
+
+--------------
+
+
+For most enterprise applications:
+
+	Hybrid Search
+		  +
+	Reranker
+		  +
+	Self-RAG
+
+
+
+For very large systems:
+	
+	Hybrid Search
+      +
+	Reranker
+		  +
+	CRAG
+		  +
+	Self-RAG
+	
+	
+is considered the gold-standard architecture because it validates both:
+
+	Knowledge Quality (CRAG)
+	Answer Quality (Self-RAG)
+
+That's why researchers introduced Self-RAG after CRAG instead of replacing CRAG completely. They address different stages of the RAG pipeline.	

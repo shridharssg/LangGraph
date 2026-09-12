@@ -1,0 +1,376 @@
+SHORT-TERM MEMORY IN LANGGRAPH
+========================================================================
+
+A. LangGraph Short-Term Memory
+------------------------------------------------------------------------
+
+	Core Components:
+
+		A. Checkpointer
+			- Stores graph state.
+			- Saves state after each super-step.
+
+		B. Thread / Thread ID
+			- Represents a conversation.
+			- Each conversation has a unique Thread ID.
+
+	Purpose:
+		Thread ID + Checkpointer = Short-Term Memory
+
+========================================================================
+
+D. Basic Implementation
+------------------------------------------------------------------------
+
+	Without Memory:
+
+		Input 1:
+			"Hi, my name is Shridhar"
+
+		Input 2:
+			"What is my name?"
+
+		Result:
+			LLM cannot remember the name.
+
+	------------------------------------------------------------
+
+	With Checkpointer:
+
+		Components:
+			- InMemorySaver
+			- Thread ID
+
+		Flow:
+			1. Create Checkpointer
+			2. Compile Graph with Checkpointer
+			3. Pass Thread ID during invoke
+			4. State gets preserved
+
+		Result:
+			LLM correctly remembers previous messages.
+
+========================================================================
+
+E. Thread-Based Memory Isolation
+------------------------------------------------------------------------
+
+	Thread 1:
+		- User introduces name.
+		- Memory is available.
+
+	Thread 2:
+		- New conversation.
+		- Previous context unavailable.
+
+	Key Point:
+		Each thread maintains its own conversation buffer.
+
+========================================================================
+
+F. Problem with InMemorySaver
+------------------------------------------------------------------------
+
+	Issue:
+		- State is stored in RAM.
+		- RAM is volatile.
+		- Restarting application removes stored state.
+
+	Effect:
+		Previous conversations are lost.
+
+========================================================================
+
+G. Persistence Solution
+------------------------------------------------------------------------
+
+	Goal:
+		Store conversation state permanently.
+
+	Recommended Database:
+		- PostgreSQL
+
+	Possible Setup:
+
+		A. Local PostgreSQL Installation
+
+		B. Docker-Based PostgreSQL Setup
+			(Preferred)
+
+========================================================================
+
+H. PostgreSQL Persistence Flow
+------------------------------------------------------------------------
+
+	Steps:
+
+		1. Install Docker
+
+		2. Verify Installation
+			Command:
+				Docker --version
+
+		3. Create docker-compose file
+
+		4. Run PostgreSQL Container
+
+		5. Install Python Dependencies
+
+		6. Configure Database URI
+
+		7. Create PostgreSaver
+
+		8. Compile Graph Using Checkpointer
+
+		9. Use Thread ID
+
+		10. Invoke Graph
+
+	Result:
+		Conversation state survives application restart.
+
+========================================================================
+
+I. Context Overflow Problem
+------------------------------------------------------------------------
+
+	Definition:
+		Occurs when input token count exceeds LLM context window.
+
+	Cause:
+		Short-Term Memory continuously appends history.
+
+	Example:
+		- 500 messages
+		- 1000 messages
+		- Very long AI responses
+
+	Effects:
+		- Hallucinations
+		- Incorrect responses
+		- Reduced reliability
+
+========================================================================
+
+J. Trimming Technique
+------------------------------------------------------------------------
+
+	Purpose:
+		Keep token count within limit.
+
+	Example:
+		Max Token Limit = 500
+
+	Process:
+		1. Count tokens.
+		2. Check limit.
+		3. Keep only recent messages.
+		4. Ignore older messages.
+
+	Rule:
+		Keep last N messages whose token count remains
+		within allowed limit.
+
+	Key Function:
+		trim_messages()
+
+	Benefits:
+		- Prevents context overflow.
+		- Easy implementation.
+
+	Limitation:
+		Older context becomes unavailable.
+
+========================================================================
+
+K. Important Note About Trimming
+------------------------------------------------------------------------
+
+	Trimming Does NOT:
+		- Delete messages from state.
+		- Delete messages from memory.
+
+	Trimming DOES:
+		- Hide older messages from the LLM.
+		- Send only selected messages.
+
+========================================================================
+
+L. Limitation of Trimming
+------------------------------------------------------------------------
+
+	Problem:
+		Older messages may still be important.
+
+	Example:
+		Critical information may exist in earlier messages.
+
+	Consequence:
+		Conversation quality may degrade.
+
+========================================================================
+
+M. Summarization Technique
+------------------------------------------------------------------------
+
+	Purpose:
+		Preserve historical context efficiently.
+
+	Process:
+
+		Step 1:
+			Keep recent N messages.
+
+		Step 2:
+			Send old messages to another LLM.
+
+		Step 3:
+			Generate summary.
+
+		Step 4:
+			Send:
+				- Summary
+				- Recent Messages
+
+		Step 5:
+			Store summary in state.
+
+	Benefit:
+		Historical context remains available.
+
+========================================================================
+
+N. Summarization Example
+------------------------------------------------------------------------
+
+	Scenario:
+		Total Messages = 500
+
+	Configuration:
+		Keep Last 100 Messages
+
+	Result:
+		- First 400 messages → Summary
+		- Last 100 messages → Original Form
+
+	Input Sent To LLM:
+		Summary + Last 100 Messages
+
+========================================================================
+
+O. Deletion Concept
+------------------------------------------------------------------------
+
+	Purpose:
+		Remove unnecessary old messages.
+
+	Function:
+		RemoveMessage
+
+	Example Rule:
+		If total messages > 10
+
+		Then:
+			- Delete first 6 messages
+			- Keep remaining messages
+
+	Result:
+		State size remains manageable.
+
+========================================================================
+
+P. Relationship Between Summarization and Deletion
+------------------------------------------------------------------------
+
+	Workflow:
+
+		1. Generate Summary
+		2. Store Summary
+		3. Delete Old Messages
+		4. Keep Recent Messages
+
+	Reason:
+		Avoid duplicate context.
+
+========================================================================
+
+Q. Summarization Workflow in LangGraph
+------------------------------------------------------------------------
+
+	Trigger Condition:
+		Messages > 6
+
+	Flow:
+
+		Chat
+			|
+			v
+		Check Message Count
+			|
+			+--> <= 6
+			|		|
+			|		v
+			|		End
+			|
+			+--> > 6
+					|
+					v
+				Summarize
+					|
+					v
+				Delete Old Messages
+					|
+					v
+				End
+
+========================================================================
+
+R. Summary Node Logic
+------------------------------------------------------------------------
+
+	Case 1:
+		First Summary Creation
+
+		Prompt:
+			"Summarize the conversation above"
+
+	Case 2:
+		Existing Summary Available
+
+		Prompt:
+			"Extend existing summary using new conversation"
+
+	Output:
+		- Updated Summary
+		- Reduced Message List
+
+========================================================================
+
+S. Key Takeaways
+------------------------------------------------------------------------
+
+	1. LLMs are stateless.
+
+	2. LangGraph uses:
+		- Checkpointer
+		- Thread ID
+		for Short-Term Memory.
+
+	3. InMemorySaver stores state only in RAM.
+
+	4. PostgreSQL provides persistence.
+
+	5. Context overflow is a major STM challenge.
+
+	6. Trimming keeps token count under control.
+
+	7. Summarization preserves historical context.
+
+	8. Deletion removes obsolete messages.
+
+	9. Production systems typically combine:
+		- Persistence
+		- Trimming
+		- Summarization
+
+	10. These techniques enable scalable Short-Term Memory in LangGraph.

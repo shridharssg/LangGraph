@@ -1,0 +1,450 @@
+Q1. What is LangGraph and why do we need it?
+
+Answer:
+LangGraph is a framework for building stateful, multi-step, controllable LLM and agent workflows using graphs.
+
+It is especially useful for workflows involving:
+
+- Routing
+- Loops
+- Parallel execution
+- State management
+- Persistence
+- Human-in-the-loop behavior
+----------------------------------------------------------------------
+
+
+LANGGRAPH VS LANGCHAIN
+======================================================================
+
+Q1. When would you choose LangGraph instead of LangChain?
+
+Answer:
+LangChain is useful for building:
+
+- LLM applications
+- Chains
+- Tools
+- Retrievers
+- Prompts
+- Integrations
+
+LangGraph is useful when we need explicit workflow orchestration such as:
+
+- State management
+- Conditional routing
+- Loops
+- Parallel execution
+- Persistence
+- Human-in-the-loop
+- Complex multi-step agents
+
+Good interview answer:
+
+"I would use LangChain for individual LLM components and integrations, and LangGraph when I need to orchestrate multiple steps with explicit state, routing, loops, persistence, or human-in-the-loop control."
+
+======================================================================
+
+
+Q2. Explain how you would design a production LangGraph application.
+
+Answer:
+
+"I would first define a typed state containing the information required across the workflow.
+
+I would then divide the business logic into focused nodes and use edges to define the execution flow.
+
+Depending on the requirement, I could use sequential, parallel, conditional, or iterative execution.
+
+Reducers would control how multiple state updates are merged.
+
+After defining the graph, I would compile it into an executable workflow.
+
+For persistence, I would configure a checkpointer and use a thread ID to maintain separate state for different conversations or execution contexts."
+
+
+======================================================================
+
+
+Q3. What is the easiest way to remember the main LangGraph concepts?
+
+Answer:
+
+STATE
+  |
+  v
+NODES -> Perform work
+  |
+  v
+EDGES -> Control flow
+  |
+  v
+REDUCERS -> Merge state updates
+  |
+  v
+GRAPH -> Workflow definition
+  |
+  v
+COMPILE -> Create executable workflow
+  |
+  v
+INVOKE / STREAM -> Execute workflow
+  |
+  v
+CHECKPOINTER -> Persist state
+  |
+  v
+THREAD_ID -> Identify separate conversation/state
+
+
+
+MEMORY TRICK
+============
+State      = Data
+Node       = Work
+Edge       = Route
+Reducer    = Merge Updates
+Graph      = Workflow
+Checkpoint = Save State
+Thread ID  = Conversation ID
+Tool       = External Capability
+Agent      = Decision Maker
+Streaming  = Real-Time Updates
+
+======================================================================
+
+SCENARIO: RAG WORKFLOW
+======================================================================
+
+Q1. How would you design a RAG application using LangGraph?
+
+Answer:
+
+Example workflow:
+
+START
+  |
+  v
+Understand Query
+  |
+  v
+Retrieve Documents
+  |
+  v
+Evaluate Documents
+  |
+  +---- Relevant ----> Generate Answer ----> END
+  |
+  +---- Not Relevant
+              |
+              v
+         Rewrite Query
+              |
+              v
+       Retrieve Documents
+
+Concepts used:
+
+- Nodes perform retrieval, evaluation, generation, and query rewriting.
+- Edges define the flow.
+- Conditional edges decide whether documents are relevant.
+- Iteration allows query rewriting and another retrieval attempt.
+- State stores query, documents, and answer.
+- Checkpointer can provide persistence.
+- Thread ID separates different conversations.
+
+----------------------------------------------------------------------
+
+
+20. SCENARIO: CUSTOMER SUPPORT AGENT
+======================================================================
+
+Q1. How would you design a customer-support agent using LangGraph?
+
+Answer:
+
+Example:
+
+                    -> Billing
+                   /
+User -> Classifier
+                   \
+                    -> Technical
+                   \
+                    -> General
+
+The classifier determines the correct route.
+
+Concepts:
+
+- Classifier = Node
+- Billing/Technical/General = Nodes
+- Conditional routing = Edge logic
+- State = User query and processing results
+- Reducer = Message/state merging when required
+- Checkpointer = Persistent state
+- Thread ID = Separate customer conversations
+
+----------------------------------------------------------------------
+
+
+
+LANGGRAPH CORE COMPONENTS - INTERVIEW GUIDE
+===========================================
+
+1. STATE
+--------
+State is the shared data that flows between nodes.
+State is the central data structure used to share and update information across all nodes in a LangGraph workflow.
+
+
+Example:
+{
+  question,
+  documents,
+  answer
+}
+
+
+2. NODE
+-------
+A Node is a function that performs a task.
+A Node is an execution unit that receives state, processes it, and returns updated state.
+
+
+Examples:
+- Retrieve documents
+- Generate answer
+- Call tool
+- Summarize text
+
+
+3. EDGE
+-------
+Edges define how execution moves between nodes.
+
+Example:
+START
+  ↓
+Retrieve
+  ↓
+Generate
+  ↓
+END
+
+
+
+
+4. CONDITIONAL EDGE
+-------------------
+Used for decision making.
+Conditional edges dynamically decide the next node based on state values.
+
+
+Example:
+Need Retrieval?
+   ├─ Yes → Retrieve
+   └─ No  → Generate
+
+
+
+5. REDUCER
+----------
+Reducers handle updates when multiple nodes write to the same state.
+
+Problem:
+
+Agent A → messages
+Agent B → messages
+
+Without Reducer:
+One update may overwrite another.
+
+With Reducer:
+Updates are merged safely.
+
+Example:
+messages = old_messages + new_messages
+
+Interview Answer:
+A Reducer defines how state updates are combined when multiple nodes modify the same state key.
+
+Why Important?
+- Parallel execution
+- Multi-agent systems
+- State consistency
+- Avoid data loss
+
+
+6. START
+--------
+Entry point of graph execution.
+
+START
+  ↓
+First Node
+
+
+7. END
+------
+Termination point of workflow.
+
+Generate Answer
+      ↓
+     END
+
+
+8. GRAPH
+---------
+A Graph is the complete workflow.
+A Graph is a collection of nodes and edges that define the workflow execution path.
+
+
+START
+  ↓
+Retrieve
+  ↓
+Generate
+  ↓
+END
+
+
+9. CHECKPOINTER
+---------------
+Stores workflow state.
+Checkpointing saves graph state and enables recovery, pause, and resume operations.
+
+
+	Examples:
+		- MemorySaver
+		- PostgreSQL
+		- Redis
+		- MongoDB
+
+	Benefits:
+		- Resume execution
+		- Fault recovery
+		- Persistent memory
+
+
+
+10. THREAD ID
+-------------
+Unique conversation identifier.
+Thread ID links multiple requests to the same conversation state.
+
+
+
+11. INTERRUPT
+-------------
+Pauses workflow execution.
+Interrupt allows workflows to pause and wait for external input.
+
+
+Example:
+Agent
+ ↓
+Approval Required
+ ↓
+Interrupt
+ ↓
+Human Review
+
+
+
+12. HUMAN-IN-THE-LOOP (HITL)
+----------------------------
+Human participates in workflow decisions.HITL allows human validation before critical actions are executed.
+
+
+Example:
+AI Suggestion
+   ↓
+Human Approval
+   ↓
+Continue
+
+
+
+13. MEMORY
+----------
+Short-Term Memory
+- Current conversation
+
+Long-Term Memory
+- PostgreSQL
+- MongoDB
+- Vector Database
+
+Interview Answer:
+Memory enables an agent to recall previous information across conversations.
+
+
+14. TOOLS
+---------
+External capabilities used by agents.
+
+Examples:
+- Search API
+- Calculator
+- Database
+- Weather API
+
+Interview Answer:
+Tools allow agents to interact with external systems and data sources.
+
+
+15. AGENT
+---------
+Decision-making component.
+
+Question
+   ↓
+Agent
+   ↓
+Select Tool
+   ↓
+Generate Result
+
+Interview Answer:
+An Agent reasons about a task and decides which actions or tools to use.
+
+
+16. STREAMING
+-------------
+Provides updates while workflow is running.
+
+Example:
+Retrieving Documents...
+Generating Answer...
+Done.
+
+
+MOST IMPORTANT LANGGRAPH ARCHITECTURE
+=====================================
+
+                START
+                   ↓
+                Agent
+                   ↓
+          Need Retrieval?
+             ↙         ↘
+           Yes         No
+            ↓           ↓
+        Retriever    Generate
+            ↓           ↓
+        Documents      ↓
+            ↓           ↓
+         LLM Answer
+             ↓
+            END
+
+
+
+
+Q1. What are the core components of LangGraph?
+Ans:
+State, Node, Edge, Conditional Edge, Reducer, Graph, Checkpointer, Thread ID, Memory, Tools, Agent, Streaming, Interrupt, START and END.
+
+
+

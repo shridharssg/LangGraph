@@ -1,0 +1,202 @@
+1. NODE
+======================================================================
+
+Q1. What is a node in LangGraph?
+
+Answer:
+A node is a function that performs a specific operation in a LangGraph workflow.
+
+A node receives the current state and returns an update to that state.
+
+Simple example:
+
+def add_number(state):
+    return {"result": state["number"] + 10}
+
+Here, add_number is a node. It reads the number from the state and updates the result.
+
+----------------------------------------------------------------------
+
+Q2. What does a node receive and return?
+
+Answer:
+A node generally receives the current state and returns a state update.
+
+Flow:
+
+State -> Node -> State Update
+
+Example:
+
+def calculate(state):
+    total = state["a"] + state["b"]
+    return {"total": total}
+
+----------------------------------------------------------------------
+
+Q3. Can a node call an LLM?
+
+Answer:
+Yes.
+
+A node can call:
+- LLM
+- Database
+- API
+- Python function
+- Tool
+- Another service
+
+The node contains the actual operation that needs to be performed.
+
+----------------------------------------------------------------------
+
+Q4. Can a node contain multiple operations?
+
+Answer:
+Yes, technically.
+
+However, it is better to keep nodes focused on a specific responsibility.
+
+For example:
+
+validate_input
+      |
+      v
+calculate_price
+      |
+      v
+apply_discount
+
+This is generally easier to understand, test, debug, and maintain than putting everything into one large node.
+
+----------------------------------------------------------------------
+
+
+2. EDGE
+======================================================================
+
+Q1. What is an edge in LangGraph?
+
+Answer:
+An edge defines the flow between nodes.
+
+It tells LangGraph which node should execute next.
+
+Example:
+
+graph.add_edge("calculate", "validate")
+
+This means after the calculate node finishes, the validate node should execute.
+
+----------------------------------------------------------------------
+
+Q3. What are START and END?
+
+Answer:
+START represents the entry point of the graph.
+
+END represents the termination point of the graph.
+
+Example:
+
+graph.add_edge(START, "calculate")
+graph.add_edge("calculate", END)
+
+Flow:
+
+START -> calculate -> END
+
+----------------------------------------------------------------------
+
+
+3. GRAPH
+======================================================================
+
+Q1. What is a graph in LangGraph?
+
+Answer:
+A graph is a collection of state, nodes, and edges that together define the workflow of an application.
+
+Example:
+
+START
+  |
+  v
+Validate
+  |
+  v
+Calculate
+  |
+  v
+Format Result
+  |
+  v
+END
+
+----------------------------------------------------------------------
+
+
+4. INVOKE
+======================================================================
+
+Q1. What is invoke()?
+
+Answer:
+invoke() executes a compiled LangGraph workflow synchronously.
+
+It sends input state into the graph and returns the resulting state.
+
+Example:
+
+result = workflow.invoke({
+    "number": 20
+})
+
+----------------------------------------------------------------------
+
+Q2. What is the difference between invoke() and stream()?
+
+Answer:
+
+invoke():
+- Waits until graph execution completes.
+- Returns the final result.
+
+stream():
+- Provides intermediate results while the graph is executing.
+
+invoke() is useful when we need only the final result.
+
+stream() is useful for:
+- Streaming UI
+- Debugging
+- Monitoring
+- Long-running workflows
+- Observing intermediate node execution
+
+----------------------------------------------------------------------
+
+
+5. COMPILE
+======================================================================
+
+Q1. Why do we use compile()?
+
+Answer:
+compile() converts the graph definition into an executable workflow.
+
+Typical flow:
+
+graph = StateGraph(State)
+
+Add nodes
+Add edges
+
+workflow = graph.compile()
+
+Then:
+
+workflow.invoke(input)
+
+======================================================================

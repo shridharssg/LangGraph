@@ -1,0 +1,210 @@
+LANGSMITH QUICK INTERVIEW GUIDE
+==============================
+
+WHAT IS LANGSMITH?
+LangSmith is used to debug, monitor, test, and evaluate LLM applications.
+
+Simple Example:
+LangChain = Build the AI app
+LangGraph = Create workflow/agent
+LangSmith = Observe and debug everything
+
+WHY LANGSMITH?
+Without LangSmith:
+- Hard to know why answer is wrong
+- Hard to see prompts and tool calls
+
+With LangSmith:
+- View prompts
+- View tool calls
+- View responses
+- View token usage
+- View latency
+
+CORE CONCEPTS
+
+1. Trace
+A complete execution of one user request.
+
+Example:
+User: What is AWS Lambda?
+Trace:
+- Input
+- Prompt
+- LLM call
+- Output
+
+2. Run
+A single step inside a trace.
+
+Example:
+Trace
+ ├─ Retrieve Docs
+ ├─ Build Prompt
+ └─ LLM Call
+
+3. Thread
+A conversation session.
+
+Example:
+User: My name is Shridhar.
+User: What is my name?
+Both belong to same thread.
+
+Easy Memory Trick
+Thread > Trace > Run
+
+4. Project
+Container for traces.
+
+Example:
+- Development
+- Testing
+- Production
+
+5. Dataset
+Collection of test questions and expected answers.
+Used for regression testing.
+
+6. Evaluation
+Measures output quality.
+
+Types:
+- Human Evaluation
+- Automated Evaluation
+- LLM-as-a-Judge
+
+MOST IMPORTANT INTERVIEW QUESTIONS
+
+Q. What is LangSmith?
+Ans: An observability, debugging, testing, and evaluation platform for LLM applications.
+
+Q. Difference between LangChain and LangSmith?
+Ans: LangChain builds applications. LangSmith monitors and evaluates them.
+
+Q. Difference between LangGraph and LangSmith?
+Ans: LangGraph executes workflows. LangSmith observes workflows.
+
+Q. What is a Trace?
+Ans: Complete execution path of a single request.
+
+Q. What is a Run?
+Ans: One operation inside a trace.
+
+Q. What is a Thread?
+Ans: A conversation session containing multiple traces.
+
+Q. Why is LangSmith important?
+Ans: It makes AI applications observable and easy to debug.
+
+Q. How does LangSmith help in production?
+Ans:
+- Failure detection
+- Cost monitoring
+- Latency monitoring
+- Response quality analysis
+
+REAL PROJECT ANSWER
+I used LangSmith with LangGraph to monitor prompts, tool calls, model responses, token usage, latency, and workflow execution. It helped identify prompt and retrieval issues quickly and reduced debugging time.
+
+
+=======================
+
+LANGSMITH FOR RAG & @TRACEABLE
+===============================
+
+LANGSMITH IN RAG
+
+RAG Flow
+
+	User Query
+	   ↓
+	Retriever
+	   ↓
+	Vector DB
+	   ↓
+	Chunks
+	   ↓
+	LLM
+	   ↓
+	Answer
+
+
+
+What LangSmith Shows
+- User query
+- Retrieved chunks
+- Prompt sent to LLM
+- Final answer
+- Token usage
+- Latency
+
+Example:
+User: What is AWS Lambda?
+LangSmith displays:
+Question → Retrieved Chunks → Prompt → Response
+
+WHY TRACEABILITY IS IMPORTANT?
+It helps locate failures.
+
+Example:
+Wrong Answer
+    ↓
+Check Retrieval
+    ↓
+Check Prompt
+    ↓
+Check LLM Output
+
+You can identify exactly where the problem occurred.
+
+WHAT IS @TRACEABLE?
+@traceable automatically tracks a function execution and creates a Run inside a Trace.
+
+Example:
+	retrieve_documents()
+	build_prompt()
+	generate_response()
+
+Each function becomes a separate run.
+
+IMPORTANT POINT
+
+	@traceable does NOT create a new trace.
+	It creates a Run inside an existing trace.
+
+INTERVIEW QUESTIONS
+
+Q. What is @traceable?
+Ans: A decorator that records a function execution as a run in LangSmith.
+
+Q. What information is captured?
+Ans:
+- Inputs
+- Outputs
+- Execution time
+- Errors
+- Metadata
+
+Q. Why use @traceable?
+Ans:
+- Better debugging
+- Latency analysis
+- Error tracking
+- Function-level observability
+
+Q. Should every function use @traceable?
+Ans: No. Use it for important business functions such as retrieval, tool calls, prompt building, and LLM execution.
+
+Q. How does @traceable help in RAG?
+Ans: It helps determine whether failures came from retrieval, reranking, prompt construction, or the LLM.
+
+SENIOR INTERVIEW ANSWER
+Most RAG failures occur before the LLM. Using LangSmith and @traceable, I can inspect retrieval, reranking, prompt creation, and model calls separately, which helps identify root causes and improve response quality.
+
+QUICK REVISION
+Thread = Conversation
+Trace = One Request
+Run = One Step
+@traceable = Creates Runs
+LangSmith = Debug + Monitor + Evaluate

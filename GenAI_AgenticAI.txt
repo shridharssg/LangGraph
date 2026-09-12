@@ -1,0 +1,143 @@
+GENAI + AGENTIC AI QUICK REVISION NOTES
+========================================================================
+
+A. GENERATIVE AI
+------------------------------------------------------------------------
+
+	Definition:
+		Generative AI creates new content such as:
+			- Text
+			- Images
+			- Audio
+			- Code
+			- Video
+
+	Goal:
+		Generate human-like content.
+
+	Popular Examples:
+		- ChatGPT
+		- Gemini
+		- Claude
+		- DALL-E
+		- Midjourney
+		- Sora
+
+------------------------------------------------------------------------
+
+	Common Use Cases:
+		- Content Writing
+		- Software Development
+		- Customer Support
+		- Education
+		- Design & Media
+
+========================================================================
+
+B. LIMITATIONS OF GENERATIVE AI CHATBOTS
+------------------------------------------------------------------------
+
+	1. Reactive
+		Respond only after user prompts.
+
+	2. No Memory
+		Cannot remember long-term context.
+
+	3. Generic Advice
+		Not aware of company-specific information.
+
+	4. No Actions
+		Cannot perform real-world tasks.
+
+========================================================================
+
+C. EVOLUTION TOWARDS AGENTIC AI
+------------------------------------------------------------------------
+
+	Stage 1:
+		Generative AI
+			↓
+		Content Generation
+
+	Stage 2:
+		RAG Chatbot
+			↓
+		Knowledge + Context
+
+	Stage 3:
+		Tool-Augmented Chatbot
+			↓
+		Knowledge + Actions
+
+	Stage 4:
+		Agentic AI
+			↓
+		Knowledge + Actions + Planning + Memory
+		+ Adaptability
+
+========================================================================
+
+D. WHAT IS AGENTIC AI?
+------------------------------------------------------------------------
+
+	Definition:
+		Agentic AI takes a goal from a user and works
+		autonomously toward achieving it.
+
+	Capabilities:
+		- Understand Goals
+		- Create Plans
+		- Execute Tasks
+		- Adapt to Changes
+		- Seek Help When Necessary
+
+	Key Idea:
+		Agentic AI is proactive, not reactive.
+
+========================================================================
+
+E. GENERATIVE AI vs AGENTIC AI
+------------------------------------------------------------------------
+
+	Generative AI:
+		- Content Focused
+		- Reactive
+		- Prompt Driven
+		- Limited Autonomy
+
+	Agentic AI:
+		- Goal Focused
+		- Proactive
+		- Autonomous
+		- Adaptive
+		- Context Aware
+		- Planning Driven
+
+------------------------------------------------------------------------
+
+	Remember:
+
+		Generative AI provides Capability.
+		Agentic AI provides Behavior.
+
+========================================================================
+
+F. RECRUITER EXAMPLE (MOST IMPORTANT)
+------------------------------------------------------------------------
+
+	Goal:
+		Hire a Backend Engineer.
+
+	Agent Workflow:
+
+		1. Create Job Description
+		2. Publish Job Post
+		3. Monitor Applications
+		4. Screen Candidates
+		5. Schedule Interviews
+		6. Send Offer Letter
+		7. Complete Onboarding
+
+	Observation:
+		Human gives only the goal.
+		Agent handles the workflow.

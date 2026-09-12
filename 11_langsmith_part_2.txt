@@ -1,0 +1,474 @@
+============================================================
+22. HOW IS LANGSMITH USED IN RAG APPLICATIONS?
+============================================================
+
+Answer:
+
+In a RAG (Retrieval Augmented Generation) system there are multiple
+steps:
+
+User Query
+    ↓
+Retriever
+    ↓
+Vector Database
+    ↓
+Retrieved Chunks
+    ↓
+LLM
+    ↓
+Final Response
+
+Without LangSmith:
+
+- Difficult to know what documents were retrieved.
+- Difficult to know why wrong answers are generated.
+- Difficult to debug retrieval failures.
+
+With LangSmith:
+
+- Query can be traced.
+- Retrieved chunks can be viewed.
+- Prompt can be inspected.
+- Final response can be compared.
+- Retrieval quality can be analyzed.
+
+Example:
+
+User:
+"What is AWS Lambda?"
+
+LangSmith shows:
+
+Question
+↓
+Top 5 Retrieved Chunks
+↓
+Prompt Sent To LLM
+↓
+LLM Response
+
+This makes RAG debugging much easier.
+
+============================================================
+23. WHY IS TRACEABILITY IMPORTANT IN RAG?
+============================================================
+
+Answer:
+
+Traceability means tracking every step of the request life cycle.
+
+Benefits:
+
+1. Identify retrieval issues.
+2. Detect hallucinations.
+3. Verify source documents.
+4. Analyze prompt quality.
+5. Improve answer accuracy.
+
+Example:
+
+Wrong Answer Generated.
+
+Using Trace:
+
+User Query
+↓
+Chunk Retrieved
+↓
+Prompt
+↓
+LLM Output
+
+Developer can identify if problem occurred in:
+
+- Retrieval
+- Chunking
+- Embeddings
+- Prompting
+- LLM
+
+------------------------------------------------------------
+Interview One-Liner
+------------------------------------------------------------
+
+Traceability helps determine exactly where a RAG system failed.
+
+============================================================
+24. WHAT CAN YOU SEE IN A LANGSMITH TRACE?
+============================================================
+
+Answer:
+
+Inside a trace we can see:
+
+- User input
+- System prompt
+- Retrieved documents
+- Tool calls
+- Agent actions
+- Node executions
+- LLM response
+- Latency
+- Token usage
+- Errors
+
+Interview Answer:
+
+Trace provides complete visibility into application execution.
+
+============================================================
+25. WHAT IS THREAD_ID IN LANGSMITH?
+============================================================
+
+Answer:
+
+Thread ID represents a conversation session.
+
+Each conversation receives a unique Thread ID.
+
+Example:
+
+Thread 1
+
+User:
+Hello
+
+Assistant:
+Hi
+
+User:
+What is Lambda?
+
+All messages belong to same thread.
+
+Benefits:
+
+- Context preservation
+- Conversation continuity
+- Chat memory
+- Session tracking
+
+============================================================
+26. HOW IS CHAT HISTORY MAINTAINED USING THREAD_ID?
+============================================================
+
+Answer:
+
+LangGraph checkpointing uses thread_id to store state.
+
+Example:
+
+config = {
+ "configurable": {
+   "thread_id": "123"
+ }
+}
+
+Every new message is stored against that thread.
+
+Future requests with same thread_id retrieve previous conversation.
+
+Example:
+
+User:
+My name is Shridhar.
+
+Later:
+
+User:
+What is my name?
+
+System reads memory from same thread and answers correctly.
+
+============================================================
+27. HOW DOES LANGSMITH DISPLAY THREADS?
+============================================================
+
+Answer:
+
+LangSmith groups traces under conversation sessions.
+
+Developer can:
+
+- Open conversation
+- View all messages
+- Analyze complete workflow
+- Review previous runs
+
+This helps understand long-running user interactions.
+
+============================================================
+28. DIFFERENCE BETWEEN THREAD, TRACE, AND RUN
+============================================================
+
+Answer:
+
+Thread
+-------
+Entire conversation session.
+
+Trace
+------
+Single request execution.
+
+Run
+----
+Individual component execution.
+
+Example:
+
+Thread:
+Conversation with user.
+
+Trace:
+One user question.
+
+Runs:
+Retriever
+Tool Call
+LLM Call
+
+============================================================
+29. WHAT IS A PROJECT IN LANGSMITH?
+============================================================
+
+Answer:
+
+Project is a logical container for traces.
+
+Example:
+
+Project:
+Customer Support Bot
+
+Inside Project:
+
+- Traces
+- Runs
+- Evaluations
+- Datasets
+- Monitoring Data
+
+Projects help separate environments and applications.
+
+============================================================
+30. WHY CREATE MULTIPLE PROJECTS?
+============================================================
+
+Answer:
+
+Example:
+
+Project 1:
+Development
+
+Project 2:
+Testing
+
+Project 3:
+Production
+
+Benefits:
+
+- Better organization
+- Easy monitoring
+- Separate analytics
+- Environment isolation
+
+============================================================
+31. HOW DO YOU CHANGE PROJECT NAME IN LANGSMITH?
+============================================================
+
+Answer:
+
+Method 1:
+
+UI
+
+Project Settings
+↓
+Edit Project
+↓
+Update Name
+
+Method 2:
+
+Environment Variable
+
+LANGSMITH_PROJECT="CustomerSupportBot"
+
+or
+
+LANGSMITH_PROJECT="RAGApplication"
+
+All traces are stored under that project.
+
+============================================================
+32. HOW DO YOU SEND DATA TO A SPECIFIC PROJECT?
+============================================================
+
+Answer:
+
+Set project name before application starts.
+
+Example:
+
+LANGSMITH_PROJECT="AI-HR-Assistant"
+
+All traces generated by the application will appear under that
+project.
+
+
+============================================================
+34. HOW DOES LANGSMITH HELP IN VECTOR DATABASE DEBUGGING?
+============================================================
+
+Answer:
+
+Suppose using:
+
+- Pinecone
+- Qdrant
+- Chroma
+- Weaviate
+
+LangSmith can show:
+
+Query
+↓
+Retrieved Chunks
+↓
+Similarity Results
+↓
+Final Prompt
+
+Developer can determine whether poor answers originated from
+retrieval instead of LLM.
+
+============================================================
+35. WHAT IS THE BIGGEST ADVANTAGE OF LANGSMITH?
+============================================================
+
+Answer:
+
+Complete visibility into AI applications.
+
+Traditional Logs Show:
+
+- API Called
+- Error Occurred
+
+LangSmith Shows:
+
+- Prompt
+- Retrieved Context
+- Tool Calls
+- Agent Decisions
+- LLM Output
+- Token Usage
+- Latency
+- Evaluation Scores
+
+Hence AI debugging becomes much easier.
+
+============================================================
+36. REAL-TIME RAG PROJECT ANSWER
+============================================================
+
+Question:
+How would you use LangSmith in a RAG project?
+
+Answer:
+
+In my RAG application, documents are chunked, embedded, and stored
+inside a vector database. When a user asks a question, the
+retriever fetches relevant chunks, and the LLM generates an answer.
+
+I integrate LangSmith to trace the entire execution flow. It helps
+me inspect retrieved chunks, prompts, model responses, token usage,
+latency, and agent execution steps.
+
+If users receive incorrect answers, LangSmith helps determine
+whether the issue originated from chunking, embeddings,
+retrieval, prompt construction, or the LLM itself. This greatly
+reduces debugging time and improves answer quality.
+
+============================================================
+37. SENIOR INTERVIEW QUESTION
+============================================================
+
+Why is LangSmith critical for production RAG systems?
+
+Answer:
+
+Because most failures in RAG systems don't occur inside the LLM.
+
+Failures usually occur in:
+
+- Chunking
+- Metadata Filtering
+- Embeddings
+- Retriever Configuration
+- Vector Search
+- Prompt Assembly
+
+LangSmith provides complete observability for every stage of the
+pipeline, helping teams quickly identify root causes and improve
+accuracy, performance, and reliability.
+
+============================================================
+QUICK REVISION
+============================================================
+
+Thread
+------
+Conversation Session
+
+Trace
+------
+Single Question Execution
+
+Run
+----
+Single Step Execution
+
+Project
+-------
+Container For Traces
+
+Dataset
+-------
+Collection Of Test Cases
+
+Evaluation
+----------
+Quality Measurement
+
+LangGraph
+---------
+Workflow Engine
+
+LangSmith
+---------
+Tracing + Debugging + Monitoring + Evaluation
+
+RAG Debugging
+-------------
+Query
+↓
+Retriever
+↓
+Chunks
+↓
+Prompt
+↓
+LLM
+↓
+Response
+
+LangSmith can inspect every stage.
+
+============================================================
+
+

@@ -1,0 +1,346 @@
+LANGCHAIN vs LANGGRAPH - PROPER STUDY NOTES
+========================================================================
+
+A.
+B. What is LangChain?
+------------------------------------------------------------------------
+
+	Definition:
+		LangChain is an open-source framework designed to
+		simplify building LLM-based applications.
+
+	Core Building Blocks:
+
+		1. Models
+			- OpenAI
+			- Claude
+			- Gemini
+			- Hugging Face
+			- Ollama
+
+		2. Prompts
+			Purpose:
+				Prompt engineering and prompt management.
+
+		3. Retrievers
+			Purpose:
+				Fetch relevant information from knowledge bases.
+
+		4. Chains
+			Purpose:
+				Connect multiple components together.
+
+========================================================================
+
+C. Common LangChain Use Cases
+------------------------------------------------------------------------
+
+	A. Conversational Chatbots
+
+	B. Text Summarizers
+
+	C. Multi-Step Linear Workflows
+
+	D. RAG Applications
+
+	E. Basic Tool-Based Agents
+
+========================================================================
+
+D. Automated Hiring Workflow Example
+------------------------------------------------------------------------
+
+	Goal:
+		Hire a Backend Engineer.
+
+	Major Steps:
+
+		1. Receive Hiring Request
+		2. Create JD
+		3. Approve JD
+		4. Post JD
+		5. Monitor Applications
+		6. Screen Candidates
+		7. Schedule Interviews
+		8. Conduct Interviews
+		9. Send Offer Letter
+		10. Complete Onboarding
+
+	Observation:
+		This is a complex, non-linear workflow.
+
+========================================================================
+
+E. Challenge #1 - Control Flow Complexity
+------------------------------------------------------------------------
+
+	Problem:
+		LangChain is designed primarily for linear chains.
+
+	Complex Workflow Requirements:
+		- Conditional Branches
+		- Loops
+		- Jumps
+		- Retry Paths
+
+	Result:
+		Large amounts of custom glue code are required.
+
+========================================================================
+
+F. How LangGraph Solves This
+------------------------------------------------------------------------
+
+	Core Concept:
+		Workflow = Graph
+
+	Components:
+		- Nodes = Tasks
+		- Edges = Control Flow
+
+	Capabilities:
+		- Conditional Routing
+		- Loops
+		- Branching
+		- Complex Workflow Modeling
+
+========================================================================
+
+G. Challenge #2 - State Management
+------------------------------------------------------------------------
+
+	Important State Examples:
+		- Job Description
+		- Approval Status
+		- Application Count
+		- Candidate Data
+		- Offer Status
+		- Onboarding Status
+
+	Problem in LangChain:
+		State must be managed manually.
+
+	Issues:
+		- Extra code
+		- High maintenance
+		- Difficult debugging
+
+========================================================================
+
+H. LangGraph State Management
+------------------------------------------------------------------------
+
+	Key Feature:
+		State is a first-class concept.
+
+	Benefits:
+		- Every node can access state.
+		- Every node can update state.
+		- State automatically travels across workflow.
+
+	Result:
+		Stateful execution.
+
+========================================================================
+
+I. Challenge #3 - Event Driven Execution
+------------------------------------------------------------------------
+
+	Examples:
+		- Wait 7 days
+		- Wait 48 hours
+		- Wait for candidate response
+
+	Problem:
+		Workflow must pause and resume later.
+
+	LangChain:
+		Difficult to implement.
+
+	LangGraph:
+		Built-in support through persistence.
+
+========================================================================
+
+J. Challenge #4 - Fault Tolerance
+------------------------------------------------------------------------
+
+	Examples:
+		- API failure
+		- Service outage
+		- Server crash
+
+	LangChain:
+		Often restart from beginning.
+
+	LangGraph:
+		Resume from last checkpoint.
+
+	Features:
+		- Retry Logic
+		- Recovery Mechanism
+		- Checkpointing
+
+========================================================================
+
+K. Challenge #5 - Human In The Loop (HITL)
+------------------------------------------------------------------------
+
+	Examples:
+		- Approve Job Description
+		- Approve Posting
+		- Approve Offer Letter
+
+	LangGraph Supports:
+		- Pause Execution
+		- Save State
+		- Resume Later
+		- Human Approval Workflows
+
+========================================================================
+
+L. Nested Workflows (Subgraphs)
+------------------------------------------------------------------------
+
+	Definition:
+		A graph can be used as a node inside another graph.
+
+	Benefits:
+		- Reusability
+		- Modularity
+		- Cleaner Design
+
+	Use Cases:
+		- Interview Workflow
+		- Approval Workflow
+		- Multi-Agent Systems
+
+========================================================================
+
+M. Multi-Agent Systems
+------------------------------------------------------------------------
+
+	Example:
+		Self-Driving Car
+
+	Possible Agents:
+		- Sensor Agent
+		- Driving Agent
+		- Entertainment Agent
+		- Supervisor Agent
+
+	LangGraph enables coordination between agents.
+
+========================================================================
+
+N. Observability
+------------------------------------------------------------------------
+
+	Definition:
+		Ability to monitor and understand workflow behavior.
+
+	Purpose:
+		- Monitoring
+		- Debugging
+		- Auditing
+
+	Tool Used:
+		LangSmith
+
+	Tracks:
+		- Node Execution
+		- State Changes
+		- Prompts
+		- Responses
+		- Execution Paths
+
+========================================================================
+
+O. What is LangGraph?
+------------------------------------------------------------------------
+
+	Definition:
+		LangGraph is an orchestration framework for building
+		stateful, multi-step, event-driven workflows using LLMs.
+
+	Best Suited For:
+		- Single-Agent Systems
+		- Multi-Agent Systems
+		- Production Workflows
+		- Long Running Processes
+
+========================================================================
+
+P. When to Use LangChain?
+------------------------------------------------------------------------
+
+	Use LangChain When:
+		- Workflow is simple.
+		- Flow is mostly linear.
+		- Building chatbots.
+		- Building RAG systems.
+		- Creating prompt pipelines.
+
+========================================================================
+
+Q. When to Use LangGraph?
+------------------------------------------------------------------------
+
+	Use LangGraph When:
+		- Workflow is complex.
+		- Conditional branches exist.
+		- Loops are required.
+		- State must be tracked.
+		- Human approvals are needed.
+		- Multiple agents collaborate.
+		- Workflow runs for long durations.
+
+========================================================================
+
+R. LangChain vs LangGraph
+------------------------------------------------------------------------
+
+	LangChain:
+		- Provides Components
+		- Models
+		- Prompts
+		- Retrievers
+		- Tools
+		- Output Parsers
+
+	LangGraph:
+		- Provides Orchestration
+		- State Management
+		- Loops
+		- Branching
+		- Checkpointing
+		- Workflow Control
+
+========================================================================
+
+S. Key Takeaways
+------------------------------------------------------------------------
+
+	1. LangChain is a framework for LLM application development.
+
+	2. LangGraph is a workflow orchestration framework.
+
+	3. LangChain works best for linear workflows.
+
+	4. LangGraph excels at non-linear workflows.
+
+	5. LangGraph provides:
+		- State Management
+		- Conditional Routing
+		- Loops
+		- Event Driven Execution
+		- Fault Tolerance
+		- Human-In-The-Loop
+		- Subgraphs
+		- Observability
+
+	6. LangChain and LangGraph are complementary.
+
+	7. Use LangChain for components.
+
+	8. Use LangGraph for orchestration.

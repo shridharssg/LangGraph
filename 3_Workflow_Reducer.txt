@@ -1,0 +1,313 @@
+
+
+6. WORKFLOW
+======================================================================
+
+Q1. What is a workflow in LangGraph?
+
+Answer:
+A workflow is the execution structure created using state, nodes, edges, and control-flow logic.
+
+Example:
+
+START
+  |
+  v
+Validate Input
+  |
+  v
+Calculate
+  |
+  v
+Format Output
+  |
+  v
+END
+
+The compiled graph becomes the executable workflow.
+
+----------------------------------------------------------------------
+
+Q2. What types of workflows can we implement?
+
+Answer:
+Common workflow patterns include:
+
+- Sequential
+- Parallel
+- Conditional
+- Iterative
+
+LangGraph allows these patterns to be combined in the same application.
+
+----------------------------------------------------------------------
+
+
+7. SEQUENTIAL WORKFLOW
+======================================================================
+
+Q1. What is sequential execution?
+
+Answer:
+Sequential execution means nodes execute one after another in a predefined order.
+
+Example:
+
+A -> B -> C -> D
+
+Example use case:
+
+Validate Input
+      |
+      v
+Calculate Tax
+      |
+      v
+Apply Discount
+      |
+      v
+Generate Invoice
+
+Each step depends on the previous step.
+
+----------------------------------------------------------------------
+
+Q2. How do you create sequential execution?
+
+Answer:
+
+graph.add_edge("validate", "calculate")
+graph.add_edge("calculate", "discount")
+graph.add_edge("discount", "invoice")
+
+This creates:
+
+validate -> calculate -> discount -> invoice
+
+----------------------------------------------------------------------
+
+8. PARALLEL WORKFLOW
+======================================================================
+
+Q1. What is parallel execution?
+
+Answer:
+Parallel execution means multiple independent nodes can execute from the same point.
+
+Example:
+
+             -> Calculate Tax -----
+            /                      \
+START -> Process                   -> Combine -> END
+            \                      /
+             -> Calculate Discount -
+
+The tax calculation and discount calculation can happen independently.
+
+----------------------------------------------------------------------
+
+Q3. What is the main advantage of parallel execution?
+
+Answer:
+The main advantage is reduced execution time when independent tasks can run concurrently.
+
+Instead of:
+
+Task A -> Task B -> Task C
+
+we can potentially execute:
+
+Task A
+Task B
+Task C
+
+at the same time and combine their results.
+
+----------------------------------------------------------------------
+
+
+9. CONDITIONAL WORKFLOW
+======================================================================
+
+Q1. What is conditional routing?
+
+Answer:
+Conditional routing determines which node should execute next based on the current state.
+
+Example:
+
+START
+  |
+  v
+Check Amount
+  |
+  +---- amount >= 1000 ----> Apply Discount
+  |
+  +---- amount < 1000 -----> Normal Price
+
+----------------------------------------------------------------------
+
+Q2. How do you implement conditional routing?
+
+Answer:
+Create a routing function that examines the state and returns the route that should be taken.
+
+Example:
+
+def route(state):
+    if state["amount"] >= 1000:
+        return "discount"
+    return "normal"
+
+Then define conditional edges using the routing function.
+
+----------------------------------------------------------------------
+
+
+10. ITERATIVE WORKFLOW
+======================================================================
+
+Q1. What is an iterative workflow?
+
+Answer:
+An iterative workflow allows a graph to execute one or more nodes repeatedly until a condition is satisfied.
+
+Example:
+
+Generate Report
+      |
+      v
+Validate Report
+   /        \
+Good       Bad
+ |           |
+END      Improve Report
+             |
+             v
+       Validate Again
+
+----------------------------------------------------------------------
+
+Q2. Why use iteration?
+
+Answer:
+Iteration is useful when a task needs feedback and improvement.
+
+Examples:
+
+Generate code -> Test -> Fix -> Test again
+
+Generate report -> Validate -> Improve -> Validate again
+
+Generate answer -> Evaluate -> Rewrite -> Evaluate again
+
+----------------------------------------------------------------------
+
+Q3. What prevents an infinite loop?
+
+Answer:
+The workflow should have a clear termination condition.
+
+Example:
+
+if state["score"] >= 80:
+    return "finish"
+else:
+    return "improve"
+
+In production systems, a maximum retry or iteration limit should also be considered.
+
+
+----------------------------------------------------------------------
+
+Q1. What is the difference between a graph and a workflow?
+
+Answer:
+The graph is the structure we define using state, nodes, and edges.
+
+The compiled workflow is the executable form of that graph.
+
+Conceptually:
+
+Graph definition
+      |
+      v
+compile()
+      |
+      v
+Executable workflow
+      |
+      v
+invoke()
+
+
+=======================================================================
+
+
+
+11. REDUCER
+======================================================================
+
+Q1. What is a reducer in LangGraph?
+
+Answer:
+A reducer defines how updates from nodes should be combined with the existing value of a state field.
+
+Example:
+
+messages: Annotated[list, add_messages]
+
+Here, add_messages controls how new messages are merged into the existing message state.
+
+----------------------------------------------------------------------
+
+Q2. What happens without a reducer?
+
+Answer:
+For a normal state field, a new value generally replaces the previous value.
+
+----------------------------------------------------------------------
+
+Q3. Why is add_messages important?
+
+Answer:
+add_messages is useful for message-based applications because it manages how new messages are merged with the existing message history.
+
+Conceptually:
+
+Human
+AI
+Human
+AI
+
+Instead of simply replacing the previous message value.
+
+----------------------------------------------------------------------
+
+Q4. Is add_messages persistent memory?
+
+Answer:
+No.
+
+add_messages is a reducer.
+
+It defines how message updates are merged into the state.
+
+Persistence requires a checkpointer.
+
+Important distinction:
+
+Reducer = How state updates are merged
+
+Checkpointer = How state is persisted
+
+----------------------------------------------------------------------
+
+Q5. Can reducers be used for fields other than messages?
+
+Answer:
+Yes.
+
+Reducers can be used whenever we need custom logic for combining updates to a state field.
+
+----------------------------------------------------------------------

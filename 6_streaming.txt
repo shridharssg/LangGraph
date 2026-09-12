@@ -1,0 +1,748 @@
+==============================================================================
+LANGGRAPH STREAMING - COMPLETE UNDERSTANDING
+==============================================================================
+
+1. WHAT IS STREAMING?
+==============================================================================
+
+Definition:
+
+Streaming is the process of receiving intermediate results while a graph is
+still executing, instead of waiting for the entire graph execution to finish.
+
+Without Streaming:
+------------------
+
+User Request
+      |
+      v
+ Graph Execution (10 sec)
+      |
+      v
+ Final Response
+
+The user sees nothing for 10 seconds.
+
+Example:
+
+result = graph.invoke(
+    {"question": "What is AWS Lambda?"}
+)
+
+print(result)
+
+Output:
+
+{
+    "answer": "AWS Lambda is a serverless compute service..."
+}
+
+Only the final result is received.
+
+
+With Streaming:
+---------------
+
+User Request
+      |
+      v
+ Node1 Finished --> Stream Output
+      |
+      v
+ Node2 Finished --> Stream Output
+      |
+      v
+ LLM Tokens --> Stream Output
+      |
+      v
+ Final Result
+
+Example:
+
+for chunk in graph.stream(
+    {"question": "What is AWS Lambda?"}
+):
+    print(chunk)
+
+Output:
+
+Node1 result arrives
+Node2 result arrives
+Answer starts coming token by token
+
+The user continuously receives updates while the graph is running.
+
+==============================================================================
+
+2. invoke() VS stream()
+==============================================================================
+
+invoke()
+--------
+
+result = graph.invoke(input)
+
+Behavior:
+
+1. Executes entire graph.
+2. Waits until graph finishes.
+3. Returns final state only.
+
+Example:
+
+result = graph.invoke(
+    {"question": "Explain Lambda"}
+)
+
+Output:
+
+{
+   "question":"Explain Lambda",
+   "docs":["doc1","doc2"],
+   "answer":"AWS Lambda is ..."
+}
+
+
+stream()
+--------
+
+for chunk in graph.stream(input):
+    print(chunk)
+
+Behavior:
+
+1. Executes graph.
+2. Continuously emits updates.
+3. Returns intermediate data.
+4. Better user experience.
+
+==============================================================================
+
+3. WHAT HAPPENS IF stream_mode IS NOT PROVIDED?
+==============================================================================
+
+Example:
+
+for chunk in graph.stream(input):
+    print(chunk)
+
+Equivalent to:
+
+for chunk in graph.stream(
+    input,
+    stream_mode="updates"
+):
+    print(chunk)
+
+Default Mode:
+-------------
+
+stream_mode="updates"
+
+Meaning:
+
+If you don't specify stream_mode,
+LangGraph streams node updates.
+
+Most beginners use stream() without realizing that "updates" is happening
+behind the scenes.
+
+==============================================================================
+
+4. STREAM MODES OVERVIEW
+==============================================================================
+
+Available Common Modes:
+
+1. updates
+2. values
+3. messages
+4. debug
+
+Special Event Streaming:
+
+5. astream_events()
+
+
+
+==============================================================================
+
+5. STREAM MODE = "updates"
+==============================================================================
+
+Definition:
+-----------
+
+Streams only the data returned by each node when the node finishes execution.
+
+Think:
+
+"Show me what each node produced."
+
+Graph:
+
+START
+  |
+  v
+Retrieve Docs
+  |
+  v
+Generate Answer
+  |
+  v
+END
+
+Node:
+
+def retrieve(state):
+    return {
+        "docs": ["AWS Lambda Doc"]
+    }
+
+Output:
+
+{
+   "retrieve": {
+      "docs": [
+         "AWS Lambda Doc"
+      ]
+   }
+}
+
+Then:
+
+{
+   "generate": {
+      "answer": "AWS Lambda is ..."
+   }
+}
+
+Advantages:
+-----------
+
+✓ Lightweight
+✓ Most commonly used
+✓ Easy monitoring
+✓ See node results
+
+Disadvantages:
+--------------
+
+✗ Cannot see full state
+✗ Cannot see token generation
+
+Use Cases:
+-----------
+
+✓ Agent progress tracking
+✓ Node monitoring
+✓ Production logging
+✓ Workflow status updates
+
+==============================================================================
+
+6. STREAM MODE = "values"
+==============================================================================
+
+Definition:
+-----------
+
+Streams the COMPLETE graph state after every node executes.
+
+Think:
+
+"Show me the entire state after each step."
+
+Example:
+
+Initial State
+
+{
+   "question":"What is Lambda?"
+}
+
+After Retrieve:
+
+{
+   "question":"What is Lambda?",
+   "docs":["AWS Doc"]
+}
+
+After Generate:
+
+{
+   "question":"What is Lambda?",
+   "docs":["AWS Doc"],
+   "answer":"AWS Lambda is..."
+}
+
+Advantages:
+-----------
+
+✓ Complete visibility
+✓ Easy debugging
+✓ Understand state evolution
+
+Disadvantages:
+--------------
+
+✗ Large payload
+✗ More memory
+✗ More network traffic
+
+Use Cases:
+-----------
+
+✓ Development
+✓ Debugging
+✓ Understanding graph flow
+✓ Learning LangGraph
+
+==============================================================================
+
+7. STREAM MODE = "messages"
+==============================================================================
+
+Definition:
+-----------
+
+Streams LLM-generated message chunks (tokens) as they are generated.
+
+Think:
+
+"Show me what the LLM is typing."
+
+This creates the ChatGPT typing effect.
+
+Example:
+
+Question:
+
+"What is AWS Lambda?"
+
+Output arrives like:
+
+AWS
+ Lambda
+ is
+ a
+ serverless
+ compute
+ service
+
+Instead of:
+
+AWS Lambda is a serverless compute service.
+
+Code:
+
+for message, metadata in graph.stream(
+    input,
+    stream_mode="messages"
+):
+    print(message.content)
+
+Output:
+
+AWS
+ Lambda
+ is
+ a
+ serverless
+ compute
+ service
+
+Metadata Example:
+
+{
+  "langgraph_node":"chatbot"
+}
+
+Meaning:
+
+This token came from chatbot node.
+
+Advantages:
+-----------
+
+✓ Real-time answer generation
+✓ Better user experience
+✓ ChatGPT-like UI
+✓ Users don't wait
+
+Disadvantages:
+--------------
+
+✗ Many events generated
+✗ More frontend handling
+
+Use Cases:
+-----------
+
+✓ Chatbots
+✓ AI Assistants
+✓ Customer Support Bots
+✓ Chat Applications
+
+Most Important:
+
+If your goal is
+
+"Show answer while model is generating"
+
+Use:
+
+stream_mode="messages"
+
+==============================================================================
+
+8. STREAM MODE = "debug"
+==============================================================================
+
+Definition:
+-----------
+
+Streams detailed execution information.
+
+Think:
+
+"Tell me everything happening internally."
+
+Output can include:
+
+Node Start
+Node End
+State Changes
+Routing Decisions
+Execution Details
+
+Example:
+
+{
+    "node":"retrieve",
+    "status":"started"
+}
+
+{
+    "node":"retrieve",
+    "status":"completed"
+}
+
+{
+    "node":"generate",
+    "status":"started"
+}
+
+Advantages:
+-----------
+
+✓ Deep visibility
+✓ Troubleshooting
+✓ Understanding execution flow
+
+Disadvantages:
+--------------
+
+✗ Very noisy
+✗ Large amount of logs
+
+Use Cases:
+-----------
+
+✓ Debugging
+✓ Development
+✓ Learning Internals
+
+==============================================================================
+
+9. EVENT STREAMING
+==============================================================================
+
+Method:
+
+graph.astream_events()
+
+Definition:
+-----------
+
+Streams execution lifecycle events.
+
+Think:
+
+"Which node is currently running?"
+
+Example:
+
+async for event in graph.astream_events(input):
+    print(event)
+
+Output:
+
+Node Started
+
+{
+   "event":"on_chain_start",
+   "name":"retrieve"
+}
+
+Node Completed
+
+{
+   "event":"on_chain_end",
+   "name":"retrieve"
+}
+
+Tool Started
+
+{
+   "event":"on_tool_start"
+}
+
+Tool Completed
+
+{
+   "event":"on_tool_end"
+}
+
+Use Cases:
+-----------
+
+✓ Observability
+✓ LangSmith
+✓ Monitoring dashboards
+✓ Production tracing
+
+==============================================================================
+
+11. WHICH MODE SHOULD I USE?
+==============================================================================
+
+CASE 1:
+--------
+Building ChatGPT-like chatbot?
+
+Use:
+
+stream_mode="messages"
+
+Reason:
+
+Need token-by-token response.
+
+
+CASE 2:
+--------
+Need to monitor workflow progress?
+
+Use:
+
+stream_mode="updates"
+
+Reason:
+
+Want to know what each node produced.
+
+
+CASE 3:
+--------
+Learning LangGraph?
+
+Use:
+
+stream_mode="values"
+
+Reason:
+
+Can see entire state after each step.
+
+
+CASE 4:
+--------
+Graph not working?
+
+Use:
+
+stream_mode="debug"
+
+Reason:
+
+Need execution details.
+
+
+CASE 5:
+--------
+Observability / LangSmith?
+
+Use:
+
+astream_events()
+
+Reason:
+
+Need lifecycle events.
+
+
+==============================================================================
+
+12. REAL PRODUCTION AI AGENT EXAMPLE
+==============================================================================
+
+Workflow:
+
+User
+ |
+ v
+Planner
+ |
+ v
+Retriever
+ |
+ v
+Tool Call
+ |
+ v
+LLM
+ |
+ v
+Response
+
+
+	Using updates:
+
+		Planner finished
+		Retriever finished
+		Tool finished
+
+	Using messages:
+
+		AWS
+		 Lambda
+		 is
+		 a
+		 serverless
+		 service
+
+	Using events:
+
+		Planner Started
+		Planner Completed
+		Retriever Started
+		Retriever Completed
+
+	Using values:
+
+		See complete state after every step
+
+==============================================================================
+
+13. MOST COMMON PRODUCTION PATTERN
+==============================================================================
+
+Most companies use:
+
+stream_mode=["updates", "messages"]
+
+Example:
+
+for mode, chunk in graph.stream(
+    input,
+    stream_mode=["updates", "messages"]
+):
+    print(mode, chunk)
+
+Output:
+
+updates
+
+	{
+	   "retrieve":{
+		  "docs":[...]
+	   }
+	}
+
+messages
+
+	AWS
+
+	messages
+
+	Lambda...
+
+This allows:
+
+✓ Track agent progress
+✓ Stream answer tokens
+✓ Excellent user experience
+
+==============================================================================
+
+INTERVIEW ONE-LINER
+==============================================================================
+
+Streaming in LangGraph is the ability to receive intermediate outputs,
+state changes, execution events, or LLM-generated tokens while the graph
+is still running, instead of waiting for the entire workflow to complete.
+Different stream modes such as updates, values, messages, and debug are
+used depending on whether we want node outputs, full state visibility,
+token streaming, or execution-level debugging.
+
+==============================================================================
+MEMORY TRICK
+==============================================================================
+
+messages  -> What the LLM is saying
+updates   -> What each node returned
+values    -> Current full graph state
+debug     -> What is happening internally
+events    -> What is currently running
+
+==============================================================================
+
+
+
+from langgraph.graph import StateGraph, END
+from typing import TypedDict
+
+class State(TypedDict):
+    message: str
+
+def step1(state):
+    print("Step 1 executed")
+    return {"message": state["message"] + " -> Step1"}
+
+def step2(state):
+    print("Step 2 executed")
+    return {"message": state["message"] + " -> Step2"}
+
+graph = StateGraph(State)
+
+graph.add_node("step1", step1)
+graph.add_node("step2", step2)
+
+graph.set_entry_point("step1")
+
+graph.add_edge("step1", "step2")
+graph.add_edge("step2", END)
+
+app = graph.compile()
+
+for event in app.stream(
+    {"message": "Start"}
+):
+	print(event)
+	
+
+-------------
+
+{
+    "step1": {
+        "message": "Start -> Step1"
+    }
+}
+
+{
+    "step2": {
+        "message": "Start -> Step1 -> Step2"
+    }
+}	
+	

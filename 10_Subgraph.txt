@@ -1,0 +1,464 @@
+====================================================
+LANGGRAPH SUBGRAPH - INTERVIEW QUESTIONS & ANSWERS
+====================================================
+
+1. What is a Subgraph in LangGraph?
+
+Answer:
+A Subgraph is a graph that is used as a node inside another graph (parent graph).
+It helps break large workflows into smaller, reusable, and maintainable components.
+
+----------------------------------------------------
+
+2. Why do we use Subgraphs?
+
+Answer:
+- Modularity
+- Reusability
+- Better code organization
+- Easier testing
+- Separation of concerns
+- Simplifies complex agent workflows
+
+----------------------------------------------------
+
+3. How does a Subgraph work?
+
+Answer:
+A parent graph invokes a subgraph as if it were a normal node.
+The subgraph executes its internal nodes and returns the updated state back to the parent graph.
+
+----------------------------------------------------
+
+4. What problem does Subgraph solve?
+
+Answer:
+Without subgraphs, a large LangGraph workflow may contain dozens of nodes in a single graph, making it difficult to manage.
+Subgraphs divide the workflow into logical sections.
+
+Example:
+Parent Graph
+    |
+    +-- User Validation Subgraph
+    +-- Document Processing Subgraph
+    +-- Approval Subgraph
+
+----------------------------------------------------
+
+5. Can a Subgraph have multiple nodes?
+
+Answer:
+Yes.
+A subgraph can contain:
+- Multiple nodes
+- Conditional edges
+- Loops
+- Human-in-the-loop steps
+- Other subgraphs
+
+----------------------------------------------------
+
+6. Can a Subgraph call another Subgraph?
+
+Answer:
+Yes.
+
+This is called Nested Subgraphs.
+
+Parent Graph
+     |
+     +-- Order Subgraph
+              |
+              +-- Payment Subgraph
+              +-- Inventory Subgraph
+
+----------------------------------------------------
+
+7. Does a Subgraph maintain state?
+
+Answer:
+Yes.
+
+Subgraphs receive state from the parent graph and can:
+- Read state
+- Modify state
+- Return updated state
+
+----------------------------------------------------
+
+8. What is the biggest advantage of Subgraphs?
+
+Answer:
+Reusability.
+
+A single subgraph can be reused across multiple projects.
+
+Example:
+Authentication Subgraph can be used in:
+- HR Assistant
+- Banking Assistant
+- E-commerce Assistant
+
+----------------------------------------------------
+
+9. What happens when a Subgraph finishes execution?
+
+Answer:
+Control returns to the parent graph and execution continues from the next node.
+
+----------------------------------------------------
+
+10. Can Subgraphs have their own state schema?
+
+Answer:
+Yes.
+
+Subgraphs can:
+- Use parent state
+OR
+- Use their own internal state schema
+
+----------------------------------------------------
+
+11. What is the difference between Node and Subgraph?
+
+Answer:
+
+Node:
+- Single unit of work
+- Executes one function
+
+Subgraph:
+- Collection of nodes
+- Represents a complete workflow
+
+----------------------------------------------------
+
+12. When should you use Subgraphs?
+
+Answer:
+Use when:
+- Graph becomes large
+- Workflow is reusable
+- Multiple teams work on different modules
+- Complex business logic exists
+
+----------------------------------------------------
+
+13. Interview Scenario Question
+
+Question:
+You are building an AI HR Assistant. Where would you use Subgraphs?
+
+Answer:
+
+Parent Graph
+     |
+     +-- Employee Query Subgraph
+     +-- Recruitment Subgraph
+     +-- Leave Management Subgraph
+     +-- Policy Search Subgraph
+
+Each functionality becomes independent and reusable.
+
+----------------------------------------------------
+
+14. What are the limitations of Subgraphs?
+
+Answer:
+- Additional complexity
+- More state management
+- Debugging nested graphs can be harder
+- Excessive nesting reduces readability
+
+----------------------------------------------------
+
+15. Is Subgraph a separate agent?
+
+Answer:
+Not necessarily.
+
+A Subgraph is a workflow structure.
+
+However, an AI Agent workflow can be implemented as a Subgraph.
+
+----------------------------------------------------
+
+16. How does state flow in Subgraphs?
+
+Answer:
+
+Parent State
+      |
+      V
+  Subgraph
+      |
+      V
+ Updated State
+      |
+      V
+ Parent Graph
+
+----------------------------------------------------
+
+17. Can conditional routing exist inside Subgraphs?
+
+Answer:
+Yes.
+
+A Subgraph can contain:
+- Conditional edges
+- Branching
+- Dynamic routing
+- Tool selection logic
+
+----------------------------------------------------
+
+Use Case:
+AI HR Assistant
+
+Parent Graph
+
+START
+  |
+  V
+HR Assistant Graph
+  |
+  +-- Authentication Subgraph
+  |
+  +-- Employee Query Subgraph
+  |
+  +-- Recruitment Subgraph
+  |
+  +-- Policy Search Subgraph
+  |
+  V
+END
+
+----------------------------------------------------
+
+Authentication Subgraph
+
+Login Check
+     |
+Role Check
+     |
+Permission Check
+     |
+Return Result
+
+----------------------------------------------------
+
+Recruitment Subgraph
+
+Get Resume
+      |
+Resume Parsing
+      |
+Skill Matching
+      |
+Candidate Scoring
+      |
+Return Score
+
+----------------------------------------------------
+
+Execution Flow
+
+User Query
+     |
+Authentication Subgraph
+     |
+Recruitment Subgraph
+     |
+Policy Search Subgraph
+     |
+Final Response
+
+====================================================
+
+=================================================
+TYPES OF SUBGRAPHS IN LANGGRAPH
+=================================================
+
+1. Invoke a graph from inside a node
+   - Call subgraph manually from a node function.
+   - Parent and child can use different states.
+
+2. Add a Graph Directly as a Node
+
+   - Directly attach subgraph as a node.
+   - Parent and child share state keys.
+
+
+=================================================
+1. INVOKE A GRAPH FROM INSIDE A NODE
+=================================================
+
+Definition:
+The parent graph executes a normal node function.
+Inside that function, another graph (subgraph) is explicitly called.
+
+Architecture:
+
+Parent Graph
+    |
+    V
+Node A
+    |
+    V
+Node B  ---> Calls Subgraph
+                |
+                +--> Sub Node 1
+                +--> Sub Node 2
+                +--> Sub Node 3
+    |
+    V
+Node C
+
+Key Point:
+The parent graph and subgraph can have different state schemas.
+
+Advantages:
+- Maximum flexibility
+- Different state models
+- Better isolation
+- Easy encapsulation
+
+Interview Question:
+When would you use "Invoke Graph From Node"?
+
+Answer:
+When the parent graph and subgraph have
+different states or when you want full control
+over how data is passed between them.
+
+-------------------------------------------------
+
+Q: Does the subgraph share state automatically?
+
+Answer:
+No.
+You manually pass data to the subgraph and receive results back.
+
+=================================================
+2. ADD A GRAPH AS A NODE
+=================================================
+
+Definition:
+The subgraph itself becomes a node inside the parent graph.
+
+Architecture:
+
+Parent Graph
+
+START
+  |
+Node A
+  |
+Subgraph Node
+  |
+   +--> Child Node 1
+   +--> Child Node 2
+   +--> Child Node 3
+  |
+Node B
+  |
+END
+
+Key Point:
+Parent graph and subgraph share the same state keys.
+
+Advantages:
+- Simpler implementation
+- Shared state
+- Less code
+- Easy integration
+
+Interview Question:
+When would you use "Add Graph as Node"?
+
+Answer:
+When parent and subgraph need access to the same state and should 
+behave as a single workflow component.
+
+-------------------------------------------------
+
+Q: Does state automatically flow between parent
+and subgraph?
+
+Answer:
+Yes.
+
+Since both use shared state keys,
+changes made by the subgraph become available
+to the parent automatically.
+
+=================================================
+REAL-TIME EXAMPLE
+=================================================
+
+AI HR Assistant
+
+Parent Graph
+
+START
+  |
+Authentication
+  |
+Recruitment Subgraph
+  |
+Generate Response
+  |
+END
+
+-----------------------------
+Using "Add Graph As Node"
+-----------------------------
+
+Recruitment Subgraph
+
+Resume Parsing
+      |
+Skill Extraction
+      |
+Candidate Scoring
+
+All nodes use shared state:
+
+{
+  "resume": "...",
+  "skills": [],
+  "score": 85
+}
+
+-------------------------------------------------
+
+Using "Invoke Graph From Node"
+-------------------------------------------------
+
+Parent State
+
+{
+  "candidateId": "123"
+}
+
+Node Function:
+    Call Recruitment Subgraph
+
+Subgraph State
+
+{
+  "resume": "...",
+  "skills": [],
+  "score": 85
+}
+
+Result returned to Parent:
+
+{
+  "candidateId": "123",
+  "score": 85
+}
+
+=================================================

@@ -1,0 +1,252 @@
+STM vs LTM IN IKEA AGENTIC RAG PROJECT
+=====================================
+
+QUESTION
+========
+
+If conversation data is stored in PostgreSQL and remains there for
+months, why do we still call it Short-Term Memory (STM)?
+Why is Long-Term Memory (LTM) not required for this project?
+
+
+IMPORTANT CONCEPT
+=================
+
+Memory type is determined by PURPOSE, not by STORAGE.
+
+Many developers incorrectly think:
+
+RAM           = STM
+PostgreSQL    = LTM
+
+This is not correct.
+
+Both STM and LTM can be stored in PostgreSQL.
+
+The difference is based on WHY the information is stored and HOW it is used.
+
+
+WHAT IS SHORT-TERM MEMORY (STM)?
+================================
+
+STM stores information needed to continue the current conversation.
+
+Example:
+
+Employee:
+	Compare Product A and Product B.
+
+Agent:
+	Displays comparison.
+
+Employee:
+Which one has better warranty?
+
+Agent:
+Uses previous comparison context.
+
+Employee:
+Email that comparison.
+
+Agent:
+Generates PDF and sends email.
+
+In this example, the system remembers:
+
+- Product A
+- Product B
+- Comparison results
+- Current conversation context
+
+This information is only needed to continue the ongoing discussion.
+
+Therefore, it is STM.
+
+
+WHY STORE STM IN POSTGRESQL?
+============================
+
+Our application is deployed on AWS ECS.
+
+Problem with in-memory storage:
+
+Employee Request
+      ↓
+ECS Container A
+      ↓
+Memory Stored in RAM
+
+If:
+
+- Container Restarts
+- Auto Scaling Occurs
+- Request Reaches Another Container
+
+Conversation context is lost.
+
+Solution:
+
+Store conversation state in PostgreSQL.
+
+Flow:
+
+Employee
+    ↓
+Thread ID
+    ↓
+LangGraph Checkpoint
+    ↓
+PostgreSQL
+
+Benefits:
+
+- Survives ECS restart
+- Supports auto scaling
+- Supports multiple containers
+- Allows workflow resume
+- Supports HITL approvals
+
+Even though data is stored in PostgreSQL,
+it is still STM because its purpose is only to continue the conversation.
+
+
+EXAMPLE OF STM STORED IN POSTGRESQL
+===================================
+
+Thread ID: 1001
+
+Conversation:
+
+Employee:
+Compare Product A and Product B.
+
+Agent:
+Comparison generated.
+
+Employee:
+Which one is better?
+
+Agent:
+Product B is better because...
+
+Employee:
+Email that comparison.
+
+Agent:
+Generate PDF.
+
+All of this conversation may remain stored in PostgreSQL for months.
+
+However, it is still STM because it is stored as conversation context,
+not as reusable business knowledge.
+
+
+
+
+
+WHAT IS LONG-TERM MEMORY (LTM)?
+===============================
+
+LTM stores information that should influence future conversations.
+
+Examples:
+
+- User preferences
+- Customer preferences
+- Historical behavior
+- Learned facts about users
+- Personalization data
+
+Example:
+
+Customer prefers eco-friendly furniture.
+
+Customer prefers budget products.
+
+Store employee prefers warranty-first recommendations.
+
+The system remembers these facts and uses them in future sessions.
+
+This is Long-Term Memory.
+
+
+WHY LTM IS NOT REQUIRED FOR IKEA PROJECT
+========================================
+
+Current Requirements:
+
+- Warranty lookup
+- Product details
+- Product comparison
+- Product recommendations
+- PDF generation
+- Email sending
+
+Knowledge Source:
+
+- Product manuals
+- Assembly guides
+- Warranty documents
+- Product specifications
+
+All of this information already exists in:
+
+Qdrant Vector Database
+
+The system does NOT need to remember:
+
+- Employee preferences
+- Customer preferences
+- Purchase patterns
+- Historical behavior
+- Personalized recommendations
+
+Therefore LTM provides little business value.
+
+
+OUR MEMORY DESIGN
+=================
+
+Qdrant
+  ↓
+Product Knowledge
+
+PostgreSQL
+  ↓
+Conversation Context
+
+LangGraph Checkpointing
+  ↓
+STM
+
+LTM
+  ↓
+Not Required
+
+
+FINAL ARCHITECTURE DECISION
+===========================
+
+Use:
+
+✅ STM
+✅ Thread ID
+✅ LangGraph Checkpointing
+✅ PostgreSQL
+
+Do Not Use Initially:
+
+❌ LTM
+❌ User Preference Memory
+❌ Customer Behavior Memory
+❌ Personalized Memory Systems
+
+
+INTERVIEW ANSWER
+================
+
+Although conversation data is stored in PostgreSQL, it is still considered Short-Term Memory because the purpose of the data is to maintain conversation context and support workflow continuity. Memory classification depends on business purpose rather than storage technology.
+
+In the IKEA project, PostgreSQL stores LangGraph checkpoints and conversation threads so that context survives ECS restarts and scaling events. The system only needs to remember information related to the current discussion, such as product comparisons and warranty conversations.
+
+Long-Term Memory is not required because the application does not need to remember customer preferences, employee preferences, purchase history, or personalized information across future sessions. Product knowledge already exists in Qdrant and can be retrieved using Agentic RAG whenever needed.

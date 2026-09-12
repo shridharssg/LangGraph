@@ -1,0 +1,445 @@
+LONG-TERM MEMORY IN LANGGRAPH
+========================================================================
+
+A. Long-Term Memory Fundamentals
+------------------------------------------------------------------------
+
+	Definition:
+		Long-Term Memory (LTM) stores important user-specific
+		information across multiple conversations and threads.
+
+	Purpose:
+		- Personalize responses
+		- Retain useful user information
+		- Improve user experience over time
+		- Preserve information beyond a single conversation
+
+	Examples of Stored Information:
+		- User is a programmer
+		- User prefers Python
+		- User plans to travel
+		- User teaches AI on YouTube
+
+------------------------------------------------------------------------
+
+B. Why Long-Term Memory Is Needed
+------------------------------------------------------------------------
+
+	Problem:
+		Important user information is spread across multiple threads.
+
+	Example:
+		Thread 1:
+			- User prefers Python
+			- User is a programmer
+
+		Thread 2:
+			- User has travel plans
+
+		Thread 3:
+			- User has philosophical interests
+
+	Solution:
+		Extract useful information from all conversations and
+		store it in a persistent Memory Store.
+
+------------------------------------------------------------------------
+
+C. Personalized Response Flow
+------------------------------------------------------------------------
+
+	Step 1:
+		User asks a question.
+
+	Step 2:
+		LLM checks Memory Store.
+
+	Step 3:
+		Relevant memories are retrieved.
+
+	Step 4:
+		Response is personalized.
+
+	Example:
+		Memory:
+			User prefers Python.
+
+		Question:
+			Write Fibonacci code.
+
+		Response:
+			Code is generated in Python.
+
+========================================================================
+
+D. Memory Store Architecture
+------------------------------------------------------------------------
+
+	Core Component:
+		BaseStore
+
+	Capabilities:
+		- Create Memory
+		- Search Memory
+		- Update Memory
+		- Delete Memory
+
+------------------------------------------------------------------------
+
+E. Store Implementations
+------------------------------------------------------------------------
+
+	1. InMemoryStore
+		Characteristics:
+			- Stores data in RAM
+			- Useful for prototyping
+			- Not persistent
+
+	2. PostgresStore
+		Characteristics:
+			- Stores data in PostgreSQL
+			- Persistent storage
+			- Production ready
+
+	3. RedisStore
+		Characteristics:
+			- Production-grade implementation
+			- Persistent memory storage
+
+========================================================================
+
+F. Namespace Concept
+------------------------------------------------------------------------
+
+	Purpose:
+		Organize memories inside a store.
+
+	Analogy:
+		Namespace = Folder Structure
+
+	Examples:
+		users/U1
+		users/U2
+		users/U1/profile
+		users/U1/preferences
+
+------------------------------------------------------------------------
+
+G. Creating Memories
+------------------------------------------------------------------------
+
+	Function:
+		put()
+
+	Required Inputs:
+		1. Namespace
+		2. Key
+		3. Value
+
+	Example Memories:
+		- User likes pizza
+		- User prefers dark mode
+		- User likes pasta
+		- User prefers grid navigation
+
+------------------------------------------------------------------------
+
+H. Retrieving Memories
+------------------------------------------------------------------------
+
+	Function:
+		get()
+
+	Purpose:
+		Retrieve a specific memory.
+
+	Required:
+		- Namespace
+		- Key
+
+------------------------------------------------------------------------
+
+I. Retrieving All Memories
+------------------------------------------------------------------------
+
+	Function:
+		search()
+
+	Purpose:
+		Retrieve all memories from a namespace.
+
+========================================================================
+
+J. Semantic Search
+------------------------------------------------------------------------
+
+	Problem:
+		Fetching all memories may introduce noise.
+
+	Goal:
+		Retrieve only relevant memories.
+
+	Example:
+		Current Topic:
+			Mumbai travel planning
+
+		Desired Result:
+			Only travel-related memories
+
+------------------------------------------------------------------------
+
+K. Semantic Search Workflow
+------------------------------------------------------------------------
+
+	Requirements:
+		- Embedding Model
+		- Indexed Memory Store
+
+	Process:
+		1. Create embedding for memories
+		2. Create embedding for query
+		3. Compare vectors
+		4. Retrieve closest memories
+
+	Parameters:
+		- Query
+		- Limit
+
+========================================================================
+
+L. Memory-Aware Chatbot
+------------------------------------------------------------------------
+
+	Workflow:
+
+		Start
+			↓
+		Chat Node
+			↓
+		End
+
+	Responsibilities:
+		- Read memories
+		- Personalize responses
+		- Use user-specific context
+
+------------------------------------------------------------------------
+
+M. Example User Memories
+------------------------------------------------------------------------
+
+	Stored Information:
+		- User name is Nitesh
+		- User teaches AI on YouTube
+		- User prefers concise answers
+		- User likes Python examples
+		- User is building MCP servers
+
+------------------------------------------------------------------------
+
+N. Personalization Rules
+------------------------------------------------------------------------
+
+	Assistant Should:
+		- Address user by name
+		- Use known preferences
+		- Mention projects when relevant
+		- Adapt tone and explanation style
+		- Suggest follow-up questions
+
+========================================================================
+
+O. Chat Node Workflow
+------------------------------------------------------------------------
+
+	1. Extract User ID
+	2. Build Namespace
+	3. Retrieve Memories
+	4. Create Memory Context
+	5. Inject Memory into System Prompt
+	6. Call LLM
+	7. Return Personalized Response
+
+========================================================================
+
+P. Memory Creation Workflow
+------------------------------------------------------------------------
+
+	Goal:
+		Create new memories automatically.
+
+	Workflow:
+
+		Start
+			↓
+		Remember Node
+			↓
+		End
+
+------------------------------------------------------------------------
+
+Q. Memory Extraction Model
+------------------------------------------------------------------------
+
+	Outputs:
+
+		A. should_write
+			- True
+			- False
+
+		B. memories
+			- List of memories
+
+	Purpose:
+		Determine if information should be stored.
+
+------------------------------------------------------------------------
+
+R. Memory Extraction Rules
+------------------------------------------------------------------------
+
+	Store:
+		- Identity information
+		- Preferences
+		- Ongoing projects
+		- Stable user facts
+
+	Avoid:
+		- Temporary information
+		- Short-term context
+
+	Memory Format:
+		- Short
+		- Atomic
+		- Fact based
+
+========================================================================
+
+S. Deduplication Problem
+------------------------------------------------------------------------
+
+	Issue:
+		Repeated user messages create duplicate memories.
+
+	Example:
+		"My name is Nitesh"
+		stored multiple times.
+
+------------------------------------------------------------------------
+
+T. Deduplication Strategy
+------------------------------------------------------------------------
+
+	Approach:
+		Provide existing memories to the extraction model.
+
+	Each Memory Contains:
+		- Text
+		- is_new flag
+
+	Meaning:
+		is_new = True
+			New memory
+
+		is_new = False
+			Already exists
+
+	Action:
+		Store only new memories.
+
+========================================================================
+
+U. Combined Long-Term Memory Chatbot
+------------------------------------------------------------------------
+
+	Workflow:
+
+		Start
+			↓
+		Remember Node
+			↓
+		Chat Node
+			↓
+		End
+
+	Remember Node:
+		- Extract memories
+		- Store memories
+
+	Chat Node:
+		- Read memories
+		- Personalize responses
+
+========================================================================
+
+V. InMemoryStore Limitation
+------------------------------------------------------------------------
+
+	Problem:
+		Data is stored only in RAM.
+
+	Result:
+		Memories are lost after restart.
+
+========================================================================
+
+W. PostgreSQL Persistent Storage
+------------------------------------------------------------------------
+
+	Purpose:
+		Persist memories permanently.
+
+	Setup Steps:
+		1. Install Docker
+		2. Verify Docker installation
+		3. Download PostgreSQL image
+		4. Run PostgreSQL container
+		5. Install required libraries
+		6. Configure database URI
+		7. Setup PostgresStore
+		8. Compile graph using PostgresStore
+
+------------------------------------------------------------------------
+
+X. Benefits of PostgresStore
+------------------------------------------------------------------------
+
+	- Persistent storage
+	- Survives restart
+	- Production ready
+	- Suitable for real-world chatbots
+
+========================================================================
+
+Y. Final Key Takeaways
+------------------------------------------------------------------------
+
+	1. Long-Term Memory stores user-specific information.
+
+	2. BaseStore is the foundation of memory storage.
+
+	3. Namespaces organize memories.
+
+	4. Core Operations:
+		- put()
+		- get()
+		- search()
+
+	5. Semantic Search retrieves relevant memories.
+
+	6. Chatbots can personalize responses using memory.
+
+	7. Memory extraction enables automatic learning.
+
+	8. Deduplication prevents redundancy.
+
+	9. InMemoryStore is useful for development.
+
+	10. PostgresStore is preferred for production.
+
+	11. Complete LTM System:
+		- Create memories
+		- Store memories
+		- Retrieve memories
+		- Personalize responses
+		- Persist data long term
